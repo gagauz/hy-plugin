@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="hybris.commands.category"
+            name="Sample Category">
+      </category>
+      <command
+            categoryId="hybris.commands.category"
+            id="hybris.commands.sampleCommand"
+            name="Sample Command">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="hybris.handlers.SampleHandler"
+            commandId="hybris.commands.sampleCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="hybris.commands.sampleCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+6">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               id="hybris.menus.sampleMenu"
+               label="Sample Menu"
+               mnemonic="M">
+            <command
+                  commandId="hybris.commands.sampleCommand"
+                  id="hybris.menus.sampleCommand"
+                  mnemonic="S">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="hybris.toolbars.sampleToolbar">
+            <command
+                  commandId="hybris.commands.sampleCommand"
+                  icon="icons/sample.gif"
+                  id="hybris.toolbars.sampleCommand"
+                  tooltip="Say hello world">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <category
+            id="hybris.importWizards.сategory"
+            name="Hybris">
+      </category>
+      <wizard
+            category="hybris.importWizards.сategory"
+            class="hybris.importWizards.ImportHybrisWizard"
+            icon="icons/sample.gif"
+            id="hybris.importWizards.ImportHybrisWizard"
+            name="Import hybris platform">
+         <description>
+            Import a file from the local file system into the workspace.
+         </description>
+      </wizard>
+   </extension>
+
+</plugin>
