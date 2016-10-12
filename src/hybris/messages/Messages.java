@@ -57,7 +57,6 @@ public class Messages extends NLS {
     public static String ImportOperation_targetSameAsSourceError;
     public static String ImportPage_filterSelections;
 
-    public static String FileImport_selectSource;
     public static String FileImport_selectSourceTitle;
     public static String FileImport_fromDirectory;
     public static String FileImport_importFileSystem;
@@ -95,7 +94,6 @@ public class Messages extends NLS {
     public static String WizardExternalProjectImportPage_description;
     public static String WizardExternalProjectImportPage_notAProject;
     public static String WizardProjectsImportPage_ProjectsListTitle;
-    public static String WizardProjectsImportPage_ProcessingMessage;
     public static String WizardProjectsImportPage_SelectDialogTitle;
     public static String WizardProjectsImportPage_SearchingMessage;
     public static String WizardExternalProjectImportPage_errorMessage;

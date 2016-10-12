@@ -24,7 +24,7 @@ public class ImportPlatformWizard extends Wizard implements IImportWizard {
     public void init(IWorkbench workbench, IStructuredSelection selection) {
         setWindowTitle("Hybris Import Wizard"); // NON-NLS-1
         setNeedsProgressMonitor(true);
-        mainPage = new ImportPlatformPage("Select platform home"); // NON-NLS-1
+        mainPage = new ImportPlatformPage(workbench);
     }
 
     /**

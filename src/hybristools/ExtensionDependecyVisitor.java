@@ -14,7 +14,7 @@ public class ExtensionDependecyVisitor {
     }
 
     public void visit(final Predicate<Extension> handler) {
-        System.out.println("\t Visiting required extensions of " + extension.getName());
+        System.out.println("Visiting required extensions of " + extension.getName());
         if (VISITOR_CACHE.add(extension.getFolder().getAbsolutePath())) {
             try {
                 extension.getRequiredExtensions().forEach(ext -> {

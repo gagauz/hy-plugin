@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -39,7 +40,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -48,9 +48,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.WizardDataTransferPage;
 import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
@@ -62,9 +66,11 @@ import org.eclipse.ui.statushandlers.StatusManager;
 import hybris.messages.Messages;
 import hybristools.Extension;
 import hybristools.ExtensionFixer;
+import hybristools.ExtensionFixer.Holder;
 import hybristools.ExtensionResolver;
 import hybristools.ImportOption;
 import hybristools.LocalExtensionVisitor;
+import hybristools.utils.EclipseUtils;
 
 public class ImportPlatformPage extends WizardDataTransferPage {
 
@@ -73,17 +79,10 @@ public class ImportPlatformPage extends WizardDataTransferPage {
      */
     public static final String METADATA_FOLDER = ".metadata"; //$NON-NLS-1$
 
-    /**
-     * The import structure provider.
-     *
-     * @since 3.4
-     */
     private ILeveledImportStructureProvider structureProvider;
 
-    /**
-     * @since 3.5
-     *
-     */
+    private final IWorkbench workbench;
+
     private final class ProjectLabelProvider extends LabelProvider implements IColorProvider {
 
         @Override
@@ -234,6 +233,7 @@ public class ImportPlatformPage extends WizardDataTransferPage {
 
     private IStructuredSelection currentSelection;
 
+    private Button createWorkingSets;
     private Button hideConflictingProjects;
 
     private ViewerFilter conflictingProjectsFilter = new ConflictingProjectFilter();
@@ -242,21 +242,23 @@ public class ImportPlatformPage extends WizardDataTransferPage {
 
     private File platformHome;
 
+    private Button customRadioButton;
+
+    private Button notPlatformRadioButton;
+
+    private Button allRadioButton;
+
+    private boolean createWorkingSetsFlag = true;
+
     /**
      * Creates a new project creation wizard page.
      *
-     */
-    public ImportPlatformPage() {
-        this("wizardExternalProjectsPage", null, null); //$NON-NLS-1$
-    }
-
-    /**
-     * Create a new instance of the receiver.
+     * @param string
+     * @param workbench
      *
-     * @param pageName
      */
-    public ImportPlatformPage(String pageName) {
-        this(pageName, null, null);
+    public ImportPlatformPage(IWorkbench workbench) {
+        this("wizardExternalProjectsPage", workbench, null, null); //$NON-NLS-1$
     }
 
     /**
@@ -267,9 +269,10 @@ public class ImportPlatformPage extends WizardDataTransferPage {
      * @param currentSelection
      * @since 3.5
      */
-    public ImportPlatformPage(String pageName, String initialPath,
+    public ImportPlatformPage(String pageName, IWorkbench workbench, String initialPath,
             IStructuredSelection currentSelection) {
         super(pageName);
+        this.workbench = workbench;
         this.initialPath = initialPath;
         this.currentSelection = currentSelection;
         setPageComplete(false);
@@ -301,87 +304,57 @@ public class ImportPlatformPage extends WizardDataTransferPage {
     @Override
     protected void createOptionsGroupButtons(Group optionsGroup) {
 
-        try {
-            Button customOnlyButton = new Button(optionsGroup, SWT.RADIO);
-            customOnlyButton.setText(Messages.Show_extensions_presented_in_custom_folder_only);
-            customOnlyButton.addSelectionListener(new SelectionListener() {
-
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    if (customOnlyButton.getSelection()) {
+        customRadioButton = EclipseUtils.createRadio(optionsGroup, Messages.Show_extensions_presented_in_custom_folder_only,
+                (b, e) -> {
+                    if (b.getSelection()) {
                         projectsListCheckbox.setFilters(customExtensionFilter);
                         ImportOption.currentOption = ImportOption.CUSTOM_ONLY;
+                        createWorkingSets.setEnabled(false);
                     }
-                }
+                });
+        customRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-                @Override
-                public void widgetDefaultSelected(SelectionEvent e) {
-                    widgetSelected(e);
-                }
-            });
-        } catch (Exception e) {
-        }
-
-        try {
-            Button localOnlyButton = new Button(optionsGroup, SWT.RADIO);
-            localOnlyButton.setText(Messages.Show_all_except_for_platform_ext_extensions);
-            localOnlyButton.addSelectionListener(new SelectionListener() {
-
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    if (localOnlyButton.getSelection()) {
+        notPlatformRadioButton = EclipseUtils.createRadio(optionsGroup, Messages.Show_all_except_for_platform_ext_extensions,
+                (b, e) -> {
+                    if (b.getSelection()) {
                         projectsListCheckbox.setFilters(localExtensionFilter);
                         ImportOption.currentOption = ImportOption.BIN_NOT_PLATFORM;
+                        createWorkingSets.setEnabled(true);
                     }
-                }
+                });
 
-                @Override
-                public void widgetDefaultSelected(SelectionEvent e) {
-                    widgetSelected(e);
-                }
-            });
-        } catch (Exception e) {
-        }
+        notPlatformRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        try {
-            Button allButton = new Button(optionsGroup, SWT.RADIO);
-            allButton.setText(Messages.Show_all_requied_extensions);
-
-            allButton.addSelectionListener(new SelectionListener() {
-
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    if (allButton.getSelection()) {
-                        projectsListCheckbox.setFilters();
-                        ImportOption.currentOption = ImportOption.ALL;
-                    }
-                }
-
-                @Override
-                public void widgetDefaultSelected(SelectionEvent e) {
-                    widgetSelected(e);
-                }
-            });
-
-            allButton.setSelection(true);
-        } catch (Exception e) {
-        }
-
-        hideConflictingProjects = new Button(optionsGroup, SWT.CHECK);
-        hideConflictingProjects
-                .setText(Messages.WizardProjectsImportPage_hideExistingProjects);
-        hideConflictingProjects.setLayoutData(new GridData(
-                GridData.FILL_HORIZONTAL));
-        hideConflictingProjects.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                projectsListCheckbox.removeFilter(conflictingProjectsFilter);
-                if (hideConflictingProjects.getSelection()) {
-                    projectsListCheckbox.addFilter(conflictingProjectsFilter);
-                }
+        allRadioButton = EclipseUtils.createRadio(optionsGroup, Messages.Show_all_requied_extensions, (b, e) -> {
+            if (b.getSelection()) {
+                projectsListCheckbox.setFilters();
+                ImportOption.currentOption = ImportOption.ALL;
+                createWorkingSets.setEnabled(true);
             }
         });
-        Dialog.applyDialogFont(hideConflictingProjects);
+        allRadioButton.setSelection(true);
+        allRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+        createWorkingSets = EclipseUtils.createCheckbox(optionsGroup, "Create working sets",
+                (b, e) -> {
+                    createWorkingSetsFlag = b.getSelection();
+                });
+        createWorkingSets.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        createWorkingSets.setSelection(true);
+
+        hideConflictingProjects = EclipseUtils.createCheckbox(optionsGroup, Messages.WizardProjectsImportPage_hideExistingProjects,
+                (b, e) -> {
+                    Display.getDefault().asyncExec(() -> {
+                        projectsListCheckbox.removeFilter(conflictingProjectsFilter);
+                        if (b.getSelection()) {
+                            projectsListCheckbox.addFilter(conflictingProjectsFilter);
+                        }
+                    });
+                });
+        hideConflictingProjects.setSelection(true);
+        hideConflictingProjects.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+        Dialog.applyDialogFont(optionsGroup);
     }
 
     /**
@@ -392,8 +365,7 @@ public class ImportPlatformPage extends WizardDataTransferPage {
     private void createProjectsList(Composite workArea) {
 
         Label title = new Label(workArea, SWT.NONE);
-        title
-                .setText(Messages.WizardProjectsImportPage_ProjectsListTitle);
+        title.setText(Messages.WizardProjectsImportPage_ProjectsListTitle);
 
         Composite listComposite = new Composite(workArea, SWT.NONE);
         GridLayout layout = new GridLayout();
@@ -445,7 +417,6 @@ public class ImportPlatformPage extends WizardDataTransferPage {
         });
 
         projectsListCheckbox.setLabelProvider(new ProjectLabelProvider());
-
         projectsListCheckbox.addCheckStateListener(event -> {
             ProjectRecord element = (ProjectRecord) event.getElement();
             if (element.hasConflicts) {
@@ -626,31 +597,34 @@ public class ImportPlatformPage extends WizardDataTransferPage {
 
                 monitor.beginTask(
                         Messages.WizardProjectsImportPage_SearchingMessage,
-                        100);
+                        3);
                 selectedProjects = new ProjectRecord[0];
 
                 final Set<String> visitedExtensions = new HashSet<>();
                 final List<ProjectRecord> records = new ArrayList<>();
 
-                new LocalExtensionVisitor(platformHome).visit(t -> {
-                    if (visitedExtensions.add(t.getName())) {
-                        records.add(new ProjectRecord(t));
-                        System.out.println("Add -- " + t.getName());
-                        monitor.worked(50);
-                        monitor.subTask(Messages.WizardProjectsImportPage_ProcessingMessage);
+                final Holder<IProgressMonitor> monitorHolder = new Holder<>();
+                monitorHolder.set(monitor);
+
+                new LocalExtensionVisitor(platformHome).visit(ext -> {
+                    if (visitedExtensions.add(ext.getName())) {
+                        records.add(new ProjectRecord(ext));
+                        monitorHolder.get().worked(1);
+                        if (ext.getRequiredExtensions().size() > 0) {
+                            IProgressMonitor monitor0 = SubMonitor.convert(monitor, ext.getRequiredExtensions().size());
+                            monitorHolder.set(monitor0);
+                        }
                     }
                     return true;
                 });
                 if (visitedExtensions.add("platform")) {
                     records.add(new ProjectRecord(new Extension(platformHome, platformHome)));
-                    monitor.worked(50);
-                    monitor.subTask(Messages.WizardProjectsImportPage_ProcessingMessage);
+                    monitor.worked(1);
                 }
                 if (visitedExtensions.add("config")) {
                     File config = new File(platformHome.getParentFile().getParentFile(), "config");
                     records.add(new ProjectRecord(new Extension(config, platformHome)));
-                    monitor.worked(50);
-                    monitor.subTask(Messages.WizardProjectsImportPage_ProcessingMessage);
+                    monitor.worked(1);
                 }
 
                 selectedProjects = records.toArray(new ProjectRecord[records.size()]);
@@ -819,7 +793,6 @@ public class ImportPlatformPage extends WizardDataTransferPage {
         saveWidgetValues();
 
         final Object[] selected = projectsListCheckbox.getCheckedElements();
-        createdProjects = new ArrayList<>();
         WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
             @Override
             protected void execute(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -831,22 +804,13 @@ public class ImportPlatformPage extends WizardDataTransferPage {
 
                 ExtensionResolver.CACHE.clear();
                 for (Object element : selected) {
-                    status.add(createExistingProject((ProjectRecord) element, subMonitor.split(1)));
+                    try {
+                        status.add(createExistingProject((ProjectRecord) element, subMonitor.split(1)));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw e;
+                    }
                 }
-
-                // IClasspathEntry[] classpathEntries = new IClasspathEntry[0];
-                //
-                // IJavaProject javaProject;
-                // try {
-                // javaProject = (IJavaProject)
-                // platformProject.getNature(JavaCore.NATURE_ID);
-                // classpathEntries = javaProject.getRawClasspath();
-                // } catch (CoreException e) {
-                // e.printStackTrace();
-                // }
-
-                // new CommonLibsBuilder(platformHome,
-                // classpathEntries).build(SubMonitor.convert(monitor));
 
                 if (!status.isOK()) {
                     throw new InvocationTargetException(new CoreException(status));
@@ -881,8 +845,6 @@ public class ImportPlatformPage extends WizardDataTransferPage {
         return true;
     }
 
-    List<IProject> createdProjects;
-
     /**
      * Performs clean-up if the user cancels the wizard without doing anything
      */
@@ -906,7 +868,6 @@ public class ImportPlatformPage extends WizardDataTransferPage {
             String projectName = record.getProjectName();
             final IWorkspace workspace = ResourcesPlugin.getWorkspace();
             final IProject project = workspace.getRoot().getProject(projectName);
-            createdProjects.add(project);
 
             new ExtensionFixer(record.extension).fix(SubMonitor.convert(mon));
 
@@ -926,12 +887,29 @@ public class ImportPlatformPage extends WizardDataTransferPage {
             SubMonitor subTask = subMonitor.split(1).setWorkRemaining(100);
             subTask.setTaskName(Messages.WizardProjectsImportPage_CreateProjectsTask);
             project.create(description, subTask.split(30));
-            // IJavaProject javaProject = JavaCore.create(project);
-            // javaProject.setRawClasspath(new IClasspathEntry[0],
-            // subTask.split(50));
             project.open(IResource.BACKGROUND_REFRESH, subTask.split(70));
             record.project = project;
-            subMonitor.worked(1);
+
+            if (createWorkingSetsFlag) {
+                IWorkingSetManager wsManager = workbench.getWorkingSetManager();
+                if (record.extension.isCustom()) {
+                    IWorkingSet customWS = wsManager.getWorkingSet("Custom");
+                    if (null == customWS) {
+                        customWS = wsManager.createWorkingSet("Custom", new IAdaptable[0]);
+                        wsManager.addWorkingSet(customWS);
+                    }
+                    wsManager.addToWorkingSets(record.project, new IWorkingSet[] { customWS });
+                } else {
+                    IWorkingSet platformWS = wsManager.getWorkingSet("Platform");
+                    if (null == platformWS) {
+                        platformWS = wsManager.createWorkingSet("Platform", new IAdaptable[0]);
+                        wsManager.addWorkingSet(platformWS);
+                    }
+                    wsManager.addToWorkingSets(record.project, new IWorkingSet[] { platformWS });
+                }
+            }
+
+            subMonitor.done();
         } catch (CoreException e) {
             return e.getStatus();
         }

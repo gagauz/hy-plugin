@@ -61,18 +61,20 @@ public class Extension {
 
     public String getName() {
         if (name == null) {
-            try {
-                XmlUtils.parseDocument(getExtensioninfo(), "extension", new Predicate<Node>() {
-                    @Override
-                    public boolean test(Node nNode) {
-                        Element eElement = (Element) nNode;
-                        String name = eElement.getAttribute("name");
-                        Extension.this.name = name;
-                        return false;
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (getExtensioninfo().isFile()) {
+                try {
+                    XmlUtils.parseDocument(getExtensioninfo(), "extension", new Predicate<Node>() {
+                        @Override
+                        public boolean test(Node nNode) {
+                            Element eElement = (Element) nNode;
+                            String name = eElement.getAttribute("name");
+                            Extension.this.name = name;
+                            return false;
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             if (null == name) {
                 name = getFolder().getName();
