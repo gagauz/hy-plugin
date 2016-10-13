@@ -1,6 +1,6 @@
 # hy-plugin
 ## Installation:
-Copy plugin jar into plugins eclipse folder.
+Copy plugin jar [file](https://github.com/gagauz/hy-plugin/releases/download/v1.1.1/hybris_1.1.1.201610131136.jar) into the eclipse plugins folder.
 ## Usage:
 Import hybris project via Import -> Hybris -> Import hybris platform.
 
