@@ -200,6 +200,7 @@ public class ImportPlatformPage extends WizardDataTransferPage {
         public boolean select(Viewer viewer, Object parentElement,
                 Object element) {
             return ((ProjectRecord) element).extension.isPlatformExt()
+                    || ((ProjectRecord) element).extension.isCustom()
                     || ((ProjectRecord) element).extension.isPlatform()
                     || ((ProjectRecord) element).extension.isConfig();
         }
@@ -615,7 +616,6 @@ public class ImportPlatformPage extends WizardDataTransferPage {
                             monitorHolder.set(monitor0);
                         }
                     }
-                    return true;
                 });
                 if (visitedExtensions.add("platform")) {
                     records.add(new ProjectRecord(new Extension(platformHome, platformHome)));
@@ -864,7 +864,7 @@ public class ImportPlatformPage extends WizardDataTransferPage {
     private IStatus createExistingProject(final ProjectRecord record, IProgressMonitor mon)
             throws InterruptedException {
         try {
-            SubMonitor subMonitor = SubMonitor.convert(mon, 3);
+            SubMonitor subMonitor = SubMonitor.convert(mon, 4);
             String projectName = record.getProjectName();
             final IWorkspace workspace = ResourcesPlugin.getWorkspace();
             final IProject project = workspace.getRoot().getProject(projectName);
@@ -890,22 +890,29 @@ public class ImportPlatformPage extends WizardDataTransferPage {
             project.open(IResource.BACKGROUND_REFRESH, subTask.split(70));
             record.project = project;
 
+            subMonitor.worked(1);
+
             if (createWorkingSetsFlag) {
+                SubMonitor subMonitor0 = SubMonitor.convert(mon, 3);
+                subMonitor0.worked(1);
                 IWorkingSetManager wsManager = workbench.getWorkingSetManager();
                 if (record.extension.isCustom()) {
-                    IWorkingSet customWS = wsManager.getWorkingSet("Custom");
+                    IWorkingSet customWS = wsManager.getWorkingSet(Messages.WorkingSet_Custom);
                     if (null == customWS) {
-                        customWS = wsManager.createWorkingSet("Custom", new IAdaptable[0]);
+                        customWS = wsManager.createWorkingSet(Messages.WorkingSet_Custom, new IAdaptable[0]);
                         wsManager.addWorkingSet(customWS);
+                        subMonitor0.worked(1);
                     }
                     wsManager.addToWorkingSets(record.project, new IWorkingSet[] { customWS });
                 } else {
-                    IWorkingSet platformWS = wsManager.getWorkingSet("Platform");
+                    IWorkingSet platformWS = wsManager.getWorkingSet(Messages.WorkingSet_Platform);
                     if (null == platformWS) {
-                        platformWS = wsManager.createWorkingSet("Platform", new IAdaptable[0]);
+                        platformWS = wsManager.createWorkingSet(Messages.WorkingSet_Platform, new IAdaptable[0]);
                         wsManager.addWorkingSet(platformWS);
+                        subMonitor0.worked(1);
                     }
                     wsManager.addToWorkingSets(record.project, new IWorkingSet[] { platformWS });
+                    subMonitor0.done();
                 }
             }
 

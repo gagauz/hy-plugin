@@ -1,17 +1,12 @@
 package hybristools;
 
 import java.io.File;
-import java.util.function.Predicate;
+import java.util.function.Consumer;
 
 public class JdtCorePrefsCleaner {
 
-    public static final Predicate<Extension> EXT_PREFS_CLEANER = new Predicate<Extension>() {
-
-        @Override
-        public boolean test(Extension ext) {
-            cleanupPrefs(ext);
-            return false;
-        }
+    public static final Consumer<Extension> EXT_PREFS_CLEANER = ext -> {
+        cleanupPrefs(ext);
     };
 
     private static void cleanupPrefs(Extension extension) {

@@ -215,6 +215,9 @@ public class Messages extends NLS {
     public static String Show_all_except_for_platform_ext_extensions;
     public static String Show_all_requied_extensions;
 
+    public static String WorkingSet_Custom;
+    public static String WorkingSet_Platform;
+
     static {
         // load message values from bundle file
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

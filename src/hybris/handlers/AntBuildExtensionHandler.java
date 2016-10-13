@@ -10,28 +10,31 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.MessageConsole;
 
-import hybris.messages.Messages;
 import hybristools.AntCommand;
 
-public class AntAllHandler extends AbstractHandler {
+public class AntBuildExtensionHandler extends AbstractHandler {
 
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
         final IWorkspace workspace = ResourcesPlugin.getWorkspace();
 
-        final IProject platformProject = workspace.getRoot().getProject("platform");
+        final IProject platforProject = workspace.getRoot().getProject("platform");
 
-        if (platformProject.exists()) {
+        if (platforProject.exists()) {
 
-            Job job = new Job(Messages.WizardProjectsImportPage_runningAntAll) {
+            Job job = new Job("Ant build") {
                 @Override
                 public IStatus run(IProgressMonitor monitor) {
                     try {
-                        monitor.beginTask(Messages.WizardProjectsImportPage_runningAntAll, 1);
+                        monitor.beginTask("Ant build", 1);
                         if (!monitor.isCanceled()) {
-                            new AntCommand(platformProject.getLocation(), "clean", "all")
-                                    .accept(platformProject.getLocation().toFile(), monitor);
+                            new AntCommand(platforProject.getLocation(), "clean", "build")
+                                    .accept(platforProject.getLocation().toFile(), monitor);
                             monitor.worked(1);
                         } else {
                             return Status.CANCEL_STATUS;
@@ -49,5 +52,18 @@ public class AntAllHandler extends AbstractHandler {
 
         }
         return null;
+    }
+
+    private MessageConsole findConsole(String name) {
+        ConsolePlugin plugin = ConsolePlugin.getDefault();
+        IConsoleManager conMan = plugin.getConsoleManager();
+        IConsole[] existing = conMan.getConsoles();
+        for (int i = 0; i < existing.length; i++)
+            if (name.equals(existing[i].getName()))
+                return (MessageConsole) existing[i];
+        // no console found, so create a new one
+        MessageConsole myConsole = new MessageConsole(name, null);
+        conMan.addConsoles(new IConsole[] { myConsole });
+        return myConsole;
     }
 }

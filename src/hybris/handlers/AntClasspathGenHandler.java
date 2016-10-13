@@ -17,7 +17,6 @@ import org.eclipse.ui.console.MessageConsole;
 
 import hybris.messages.Messages;
 import hybristools.AntCommand;
-import hybristools.Extension;
 
 public class AntClasspathGenHandler extends AbstractHandler {
 
@@ -40,7 +39,7 @@ public class AntClasspathGenHandler extends AbstractHandler {
                                 monitor.setTaskName(
                                         Messages.bind(Messages.WizardProjectsImportPage_runningAntClasspathgenFor, project.getName()));
                                 new AntCommand(platformProject.getLocation(), "classpathgen")
-                                        .test(new Extension(project.getLocation().toFile(), platformProject.getLocation().toFile()));
+                                        .accept(project.getLocation().toFile(), monitor);
                                 monitor.worked(1);
                             } else {
                                 return Status.CANCEL_STATUS;

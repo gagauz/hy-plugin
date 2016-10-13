@@ -3,6 +3,7 @@ package hybristools;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.w3c.dom.Element;
@@ -21,7 +22,7 @@ public class LocalExtensionVisitor {
         ExtensionResolver.clearCache();
     }
 
-    public void visit(Predicate<Extension> handler) {
+    public void visit(Consumer<Extension> handler) {
         File localExtension = new File(platformFolder.getParentFile().getParentFile(), "/config/localextensions.xml");
 
         if (localExtension.isFile()) {
@@ -38,7 +39,7 @@ public class LocalExtensionVisitor {
                             extension.setLocalExtension(true);
                             localExtensions.add(extension);
                             if (null != handler) {
-                                handler.test(extension);
+                                handler.accept(extension);
                             }
                             new ExtensionDependecyVisitor(extension).visit(handler);
                         } else {

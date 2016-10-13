@@ -1,12 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
+		<launchConfigurationType
+        delegate="hybris.example.HybrisServerLaunchDelegate"
+        delegateDescription="This example tooling will run or debug example code."
+        delegateName="Hybris Application Launch Tooling"
+        id="hybris.example.HybrisServerLaunchDelegate"
+        modes="debug"
+        name="Hybris project"
+        public="true"
+        sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+        sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer"
+        type="org.eclipse.jdt.launching.localJavaApplication">
+ 		</launchConfigurationType>
+ 	</extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
             categoryId="hybris.commands.category"
+            defaultHandler="hybris.handlers.ClasspathFixerHandler"
             id="hybris.commands.fixClasspath"
             name="Fix .classpath files">
+      </command>
+      <command
+            categoryId="hybris.commands.category"
+            defaultHandler="hybris.handlers.AntAllHandler"
+            id="hybris.commands.antCleanAll"
+            name="Build and deploy platform">
+      </command>
+      <command
+            categoryId="hybris.commands.category"
+            defaultHandler="hybris.handlers.AntBuildExtensionHandler"
+            id="hybris.commands.andBuildExtension"
+            name="Ant build extension">
+      </command>
+      <command
+            defaultHandler="hybris.handlers.DebugServerHandler"
+            id="hybris.commands.DebugServer"
+            name="Debug server">
+      </command>
+      <command
+            defaultHandler="hybris.handlers.RunServerHandler"
+            id="hybris.commands.RunServer"
+            name="Run server">
       </command>
    </extension>
    <extension
@@ -23,8 +60,49 @@
             <command
                   commandId="hybris.commands.fixClasspath"
                   id="hybris.menus.fixClasspath"
+                  label="Fix extensions classpaths"
                   mnemonic="F">
             </command>
+            <command
+                  commandId="hybris.commands.antCleanAll"
+                  id="hybris.menus.antCleanAll"
+                  label="Build and deploy platform">
+			</command> 
+            <command
+                  commandId="hybris.commands.DebugServer"
+                  label="Debug server"
+                  style="push">
+            </command>
+            <command
+                  commandId="hybris.commands.antCreateExtension"
+                  label="Create extension"
+                  style="push">
+            </command>
+            <command
+                  commandId="hybris.commands.RunServer"
+                  label="Run server"
+                  style="push">
+            </command>
+            <dynamic
+                  class="hybris.ContributionItem1"
+                  id="hybris.dynamic1">
+            </dynamic>
+		 </menu>
+	  </menuContribution>
+      <menuContribution
+            locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
+         <menu
+               commandId="hybris.command.andBuildExtension"
+               icon="icons/ECP_logo_temp.gif"
+               id="hybris.context.menu.hybrisPopup"
+               label="Hybris">
+               
+               <command
+                     commandId="hybris.commands.andBuildExtension"
+                     id="hybris.menus.andBuildExtension"
+                     label="Build extension"
+                     style="push">
+               </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -43,7 +121,7 @@
       <wizard
             category="hybris.importWizards.сategory"
             class="hybris.handlers.ImportPlatformWizard"
-            icon="icons/sample.gif"
+            icon="icons/ECP_logo_temp.gif"
             id="hybris.importWizards.ImportHybrisWizard"
             name="Import hybris platform">
          <description>
@@ -53,18 +131,47 @@
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
-      <handler
-            class="hybris.handlers.ClasspathFixerHandler"
-            commandId="hybris.commands.fixClasspath">
-      </handler>
-      <handler
-            class="hybris.handlers.AntAllHandler"
-            commandId="hybris.commands.antAll">
-      </handler>
-      <handler
-            class="hybris.handlers.DisableAllBuilder"
-            commandId="hybris.commands.disableAntBuilder">
-      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.launchDelegates">
+      <launchDelegate
+            delegate="hybris.example.HybrisServerLaunchDelegate"
+            delegateDescription="Hybris server remote app"
+            id="hybris.launchDelegate1"
+            modes="debug"
+            name="Hybris server"
+            sourceLocatorId="org.eclipse.jdt.debug.ui.javaSourceLocator"
+            sourcePathComputerId="org.eclipse.ant.ui.debug.sourcePathComputer"
+            type="hybris.example.HybrisServerLaunchDelegate">
+      </launchDelegate>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabs">
+      <tab
+            class="hybris.LaunchConfigurationTab1"
+            group="hybris.launchConfigurationTabGroup1"
+            id="hybris.tab1"
+            name="hybris.tab1">
+      </tab>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="hybris.AbstractLaunchConfigurationTabGroup1"
+            id="hybris.launchConfigurationTabGroup1"
+            type="hybris.launchConfigurationTabGroup1">
+         <launchMode
+               mode="debug">
+         </launchMode>
+      </launchConfigurationTabGroup>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            configTypeID="hybris.example.HybrisServerLaunchDelegate"
+            icon="icons/ECP_logo_temp.gif"
+            id="hybris.launchConfigurationTypeImage1">
+      </launchConfigurationTypeImage>
    </extension>
 
 </plugin>

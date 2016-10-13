@@ -96,7 +96,7 @@ public class ExtensionFixer {
                 extension.getSettings().mkdir();
             } else {
                 monitor.setTaskName("Clear project specific settings");
-                JdtCorePrefsCleaner.EXT_PREFS_CLEANER.test(extension);
+                JdtCorePrefsCleaner.EXT_PREFS_CLEANER.accept(extension);
             }
             monitor.worked(1);
 
