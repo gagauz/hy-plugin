@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -20,10 +21,10 @@ import org.w3c.dom.NodeList;
 import hybristools.utils.XmlUtils;
 
 public class PlatformClasspathFixer {
-    private Extension platformFolder;
+    private Extension platform;
 
-    public PlatformClasspathFixer(Extension platformFolder) {
-        this.platformFolder = platformFolder;
+    public PlatformClasspathFixer(Extension platform) {
+        this.platform = platform;
     }
 
     public void fixClasspath() {
@@ -48,7 +49,7 @@ public class PlatformClasspathFixer {
         }
 
         try {
-            XmlUtils.doWithXmlFile(platformFolder.getClasspath(), doc -> {
+            XmlUtils.doWithXmlFile(platform.getClasspath(), doc -> {
                 NodeList nodes = doc.getElementsByTagName("classpath");
                 for (int i = 0; i < nodes.getLength();) {
                     Node node = nodes.item(i);
@@ -62,7 +63,7 @@ public class PlatformClasspathFixer {
                     createElement(node, "classpathentry", "kind", "src", "path", "bootstrap/gensrc", "output", "bootstrap/modelclasses",
                             "exported", "true");
                     createLibClasspathEntry(node, "bootstrap/resources", true);
-                    IPath platformPath = new Path(platformFolder.getFolder().getAbsolutePath());
+                    IPath platformPath = new Path(platform.getFolder().getAbsolutePath());
 
                     Set<String> addedJars = new HashSet<>(100);
                     // Exclude models.jar
@@ -70,85 +71,72 @@ public class PlatformClasspathFixer {
                     addedJars.add("zul-8.0.0.jar");
                     addedJars.add("jrebel-activation.jar");
 
-                    new DirVisitor(new File(platformFolder.getFolder(), "bootstrap"), 2).visitRecursive(f -> {
-                        if (f.getName().endsWith(".jar") && addedJars.add(f.getName())) {
+                    Consumer<File> fetchJar = f -> {
+                        if (addedJars.add(f.getName()) && !f.getName().endsWith("-sources.jar")) {
                             IPath jarPath = new Path(f.getAbsolutePath());
                             String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
                             createLibClasspathEntry(node, jarPathString, true);
                         }
-                    });
+                    };
 
-                    new DirVisitor(new File(platformFolder.getFolder(), "lib"), 3).visitRecursive(f -> {
+                    new JarFetcher(platform.getFileInFolder("bootstrap")).fetch(fetchJar);
 
-                        if (f.getName().endsWith(".jar") && addedJars.add(f.getName())) {
-                            IPath jarPath = new Path(f.getAbsolutePath());
-                            String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
-                            createLibClasspathEntry(node, jarPathString, true);
-                        }
-                    });
+                    new JarFetcher(platform.getFolder(), "lib").fetch(fetchJar);
+                    new JarFetcher(platform.getFileInFolder("tomcat")).fetch(fetchJar);
 
-                    new DirVisitor(new File(platformFolder.getFolder(), "tomcat"), 3).visitRecursive(f -> {
-                        if (f.getName().endsWith(".jar") && addedJars.add(f.getName())) {
-                            IPath jarPath = new Path(f.getAbsolutePath());
-                            String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
-                            createLibClasspathEntry(node, jarPathString, true);
+                    new LocalExtensionVisitor(platform.getFolder()).visit(ext -> {
+                        if (addedJars.add(ext.getFolder().getAbsolutePath())) {
+                            new JarFetcher(ext.getFolder(), "bin", "lib", "web/webroot/WEB-INF/lib").fetch(jar -> {
+                                if (addedJars.add(jar.getName())) {
+                                    IPath jarPath = new Path(jar.getAbsolutePath());
+                                    String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
+                                    createLibClasspathEntry(node, jarPathString, true);
+                                }
+                            });
+                            if (ImportOption.CUSTOM_ONLY.is()) {
+                                if (ext.hasFolder("classes") && addedJars.add(ext.getFolder().getAbsolutePath() + "/classes")) {
+                                    IPath jarPath = new Path(ext.getFolder().getAbsolutePath() + "/classes");
+                                    String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
+                                    createLibClasspathEntry(node, jarPathString, true);
+                                }
+                                if (ext.hasFolder("web/webroot/WEB-INF/classes")
+                                        && addedJars.add(ext.getFolder().getAbsolutePath() + "/web/webroot/WEB-INF/classes")) {
+                                    IPath jarPath = new Path(ext.getFolder().getAbsolutePath() + "/web/webroot/WEB-INF/classes");
+                                    String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
+                                    createLibClasspathEntry(node, jarPathString, true);
+                                }
+                            }
                         }
                     });
 
                     // platform/ext extensions as libraries
-                    new DirVisitor(new File(platformFolder.getFolder(), "ext"), 2).visitRecursive(f0 -> {
+                    new DirVisitor(new File(platform.getFolder(), "ext"), 2).visitRecursive(f0 -> {
                         if (f0.isDirectory() && new File(f0, "extensioninfo.xml").isFile()) {
-                            if (!ImportOption.ALL.is() || !hasProject(f0.getName())) {
-                                new DirVisitor(f0, 2).visitRecursive(f -> {
-                                    if (f.getName().endsWith(".jar") && addedJars.add(f.getName())) {
-                                        IPath jarPath = new Path(f.getAbsolutePath());
-                                        String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
-                                        createLibClasspathEntry(node, jarPathString, true);
-                                    } else if (f.isDirectory() && new File(f, "extensioninfo.xml").isFile()) {
-                                        if (new File(f, "src").isDirectory()) {
-                                            IPath jarPath = new Path(f.getAbsolutePath() + "/src");
-                                            String dirPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
-                                            createSrcClasspathEntry(node, dirPathString, true);
-                                        } else if (new File(f, "classes").isDirectory()) {
-                                            IPath jarPath = new Path(f.getAbsolutePath() + "/classes");
+                            if (addedJars.add(f0.getAbsolutePath())) {
+                                if (!ImportOption.ALL.is() || !hasProject(f0.getName())) {
+                                    new DirVisitor(f0, 2).visitRecursive(f -> {
+                                        if (f.getName().endsWith(".jar") && addedJars.add(f.getName())) {
+                                            IPath jarPath = new Path(f.getAbsolutePath());
                                             String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
                                             createLibClasspathEntry(node, jarPathString, true);
+                                        } else if (f.isDirectory() && new File(f, "extensioninfo.xml").isFile()) {
+                                            if (new File(f, "src").isDirectory()) {
+                                                IPath jarPath = new Path(f.getAbsolutePath() + "/src");
+                                                String dirPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
+                                                createSrcClasspathEntry(node, dirPathString, true);
+                                            } else if (new File(f, "classes").isDirectory()) {
+                                                IPath jarPath = new Path(f.getAbsolutePath() + "/classes");
+                                                String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
+                                                createLibClasspathEntry(node, jarPathString, true);
+                                            }
                                         }
-                                    }
-                                });
-                            } else {
-                                createSrcClasspathEntry(node, '/' + f0.getName(), true);
+                                    });
+                                } else {
+                                    createSrcClasspathEntry(node, '/' + f0.getName(), true);
+                                }
                             }
                         }
                     });
-
-                    // bin/ext- extensions as libraries
-                    if (ImportOption.CUSTOM_ONLY.is()) {
-                        new DirVisitor(new File(platformFolder.getFolder().getParent()), 0).visit(ext -> {
-                            if (ext.getName().startsWith("ext-")) {
-                                new DirVisitor(ext, 5).visitRecursive(f -> {
-                                    if (f.getName().endsWith(".jar") && addedJars.add(f.getName())) {
-                                        IPath jarPath = new Path(f.getAbsolutePath());
-                                        String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
-                                        createLibClasspathEntry(node, jarPathString, true);
-                                    } else if (f.isDirectory() && new File(f, "extensioninfo.xml").isFile()) {
-                                        if (new File(f, "classes").isDirectory() && addedJars.add(f.getAbsolutePath() + "/classes")) {
-                                            IPath jarPath = new Path(f.getAbsolutePath() + "/classes");
-                                            String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
-                                            createLibClasspathEntry(node, jarPathString, true);
-                                        }
-                                        if (new File(f, "web/webroot/WEB-INF/classes").isDirectory()
-                                                && addedJars.add(f.getAbsolutePath() + "/web/webroot/WEB-INF/classes")) {
-                                            IPath jarPath = new Path(f.getAbsolutePath() + "/web/webroot/WEB-INF/classes");
-                                            String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
-                                            createLibClasspathEntry(node, jarPathString, true);
-                                        }
-                                    }
-                                });
-                            }
-
-                        });
-                    }
 
                     break;
                 }

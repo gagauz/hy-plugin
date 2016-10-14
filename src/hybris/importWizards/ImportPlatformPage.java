@@ -199,10 +199,7 @@ public class ImportPlatformPage extends WizardDataTransferPage {
         @Override
         public boolean select(Viewer viewer, Object parentElement,
                 Object element) {
-            return ((ProjectRecord) element).extension.isPlatformExt()
-                    || ((ProjectRecord) element).extension.isCustom()
-                    || ((ProjectRecord) element).extension.isPlatform()
-                    || ((ProjectRecord) element).extension.isConfig();
+            return !((ProjectRecord) element).extension.isPlatformExt();
         }
 
     }

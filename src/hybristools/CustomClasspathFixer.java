@@ -72,15 +72,13 @@ public class CustomClasspathFixer extends ClasspathTools {
                 if (!extension.isConfig() && !extension.isPlatform() && !extension.isPlatformExt()) {
                     createElement(node, "classpathentry", "kind", "src", "path", "/platform");
                 }
-                final Set<String> dublicateChecker = new HashSet<>();
-                dublicateChecker.add("zul-8.0.0.jar");
 
                 if (extension.isCustom()) {
                     createMultipleSrcFolder(extension, node, new String[] { "src", "gensrc", "hmc/src", "backoffice/src" }, "classes",
                             true);
                     createMultipleSrcFolder(extension, node, new String[] { "web/src", "web/gensrc" }, "web/webroot/WEB-INF/classes", true);
                     createMultipleSrcFolder(extension, node, new String[] { "testsrc", "hmc/testsrc", "backoffice/testsrc" }, "testclasses",
-                            false, "*.java");
+                            false, "**/*.java");
                     createSrcFolder(extension, node, "web/testsrc", "web/webroot/WEB-INF/testclasses", false, "*.java");
 
                     if (extension.hasFolder("resources")) {
@@ -109,25 +107,7 @@ public class CustomClasspathFixer extends ClasspathTools {
                     }
                 }
 
-                visitFolder(extension.getFolder(), "web/webroot/WEB-INF/lib", lib -> {
-                    if (lib.getName().endsWith(".jar")) {
-                        if (dublicateChecker.add(lib.getName())) {
-                            createLibClasspathEntry(node, "web/webroot/WEB-INF/lib/" + lib.getName(), true);
-                        }
-                    }
-                });
-
-                new DirVisitor(extension.getFolder(), 4).visitRecursive(lib -> {
-                    if (lib.getName().endsWith(".jar") && !lib.getName().endsWith("-sources.jar")) {
-                        if (dublicateChecker.add(lib.getName())) {
-                            Path path = extension.getFolder().toPath().relativize(lib.toPath());
-                            createLibClasspathEntry(node, path.toString(), true);
-                        }
-                    }
-                });
-
                 final Set<String> dependentExtension = new HashSet<>();
-                dependentExtension.add("zul-8.0.0.jar");
                 Consumer<Extension> depfetcher = getDependencyFetcher(extension.getFolder().toPath(), dependentExtension, node);
                 extension.getRequiredExtensions().forEach(depfetcher);
                 break;
@@ -147,63 +127,8 @@ public class CustomClasspathFixer extends ClasspathTools {
                         || (ImportOption.BIN_NOT_PLATFORM.is() && requiredExt.isPlatformExt())) {
                     createElement(node, "classpathentry", "kind", "src", "path", "/" + requiredExt.getName(), "exported", "true");
                 }
-                // if (workspaceProject.contains(requiredExt.getName())) {
-                // createElement(node, "classpathentry", "kind", "src", "path",
-                // "/" + requiredExt.getName(), "exported", "true");
-                // } else {
-                // new DirVisitor(requiredExt.getFolder(),
-                // 4).visitRecursive(file -> {
-                // if (dependentExtension.add(file.getName())) {
-                // if (file.getName().endsWith(".jar")) {
-                // System.out.println("register jar " + file.getName());
-                // Path path = extensionPath.relativize(file.toPath());
-                // createLibClasspathEntry(node, path.toString(), true);
-                // } else if (file.getName().equals("classes")) {
-                //
-                // if (requiredExt.hasFolder("src") ||
-                // requiredExt.hasFolder("web/src")) {
-                //
-                // System.out.println("register " + file.getName());
-                // Path pathClasses = extensionPath.relativize(file.toPath());
-                // Path pathSrc =
-                // extensionPath.relativize(requiredExt.getFileInFolder("src").toPath());
-                // createElement(node, "classpathentry", "kind", "lib", "path",
-                // pathClasses.toString(), "exported",
-                // "true", "sourcepath", pathSrc.toString());
-                // } else {
-                // System.out.println("register " + file.getName());
-                // Path path = extensionPath.relativize(file.toPath());
-                // createLibClasspathEntry(node, path.toString(), true);
-                // }
-                // }
-                // }
-                // });
-                // requiredExt.getRequiredExtensions().forEach(getDependencyFetcher(extensionPath,
-                // dependentExtension, node));
-                // }
-                // new DirVisitor(requiredExt.getFolder(),
-                // 4).visitRecursive(file -> {
-                // if (dependentExtension.add(file.getName())) {
-                // if (file.getName().endsWith(".jar")) {
-                // System.out.println("register jar " + file.getName());
-                // Path path = extensionPath.relativize(file.toPath());
-                // createLibClasspathEntry(node, path.toString(), true);
-                // } else if (file.getName().equals("classes")) {
-                // System.out.println("register " + file.getName());
-                // Path path = extensionPath.relativize(file.toPath());
-                // createLibClasspathEntry(node, path.toString(), true);
-                // }
-                // }
-                // });
-                //
-                // requiredExt.getRequiredExtensions().forEach(getDependencyFetcher(extensionPath,
-                // dependentExtension, node));
             }
         };
-    }
-
-    public static boolean hasFolder(File parent, String file) {
-        return new File(parent, file).isDirectory();
     }
 
     public static void visitFolder(File parent, String file, Consumer<File> c) {

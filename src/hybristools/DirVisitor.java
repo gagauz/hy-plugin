@@ -15,11 +15,13 @@ public class DirVisitor {
     }
 
     public void visit(Consumer<File> visitor) {
-        for (File file : directory.listFiles()) {
-            try {
-                visitor.accept(file);
-            } catch (Exception e) {
-                break;
+        if (null != directory && directory.isDirectory()) {
+            for (File file : directory.listFiles()) {
+                try {
+                    visitor.accept(file);
+                } catch (Exception e) {
+                    break;
+                }
             }
         }
     }

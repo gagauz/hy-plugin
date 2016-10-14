@@ -1,10 +1,12 @@
-package hybris.handlers;
+package hybris.handlers.ant;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -14,15 +16,22 @@ import org.eclipse.core.runtime.jobs.Job;
 import hybris.messages.Messages;
 import hybristools.AntCommand;
 
-public class AntAllHandler extends AbstractHandler {
+public class AbstractAntHandler extends AbstractHandler {
+
+    protected IProject getTarget(ExecutionEvent event) {
+        return ResourcesPlugin.getWorkspace().getRoot().getProject("platform");
+    }
+
+    protected List<String> getArguments() {
+        return Arrays.asList("clean", "all");
+    }
 
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
-        final IWorkspace workspace = ResourcesPlugin.getWorkspace();
 
-        final IProject platformProject = workspace.getRoot().getProject("platform");
+        IProject targetProject = getTarget(event);
 
-        if (platformProject.exists()) {
+        if (targetProject.exists()) {
 
             Job job = new Job(Messages.WizardProjectsImportPage_runningAntAll) {
                 @Override
@@ -30,8 +39,8 @@ public class AntAllHandler extends AbstractHandler {
                     try {
                         monitor.beginTask(Messages.WizardProjectsImportPage_runningAntAll, 1);
                         if (!monitor.isCanceled()) {
-                            new AntCommand(platformProject.getLocation(), "clean", "all")
-                                    .accept(platformProject.getLocation().toFile(), monitor);
+                            new AntCommand(targetProject.getLocation(), getArguments())
+                                    .accept(targetProject.getLocation().toFile(), monitor);
                             monitor.worked(1);
                         } else {
                             return Status.CANCEL_STATUS;
