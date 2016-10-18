@@ -615,12 +615,12 @@ public class ImportPlatformPage extends WizardDataTransferPage {
                     }
                 });
                 if (visitedExtensions.add("platform")) {
-                    records.add(new ProjectRecord(new Extension(platformHome, platformHome)));
+                    records.add(new ProjectRecord(Extension.create(platformHome, platformHome)));
                     monitor.worked(1);
                 }
                 if (visitedExtensions.add("config")) {
                     File config = new File(platformHome.getParentFile().getParentFile(), "config");
-                    records.add(new ProjectRecord(new Extension(config, platformHome)));
+                    records.add(new ProjectRecord(Extension.create(config, platformHome)));
                     monitor.worked(1);
                 }
 

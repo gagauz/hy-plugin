@@ -36,6 +36,9 @@ public class ExtensionFixer {
     }
 
     public void fix(IProgressMonitor monitor) {
+        if (null == extension) {
+            return;
+        }
 
         try {
             XmlManipulator projectXml = new XmlManipulator(extension.getProject());

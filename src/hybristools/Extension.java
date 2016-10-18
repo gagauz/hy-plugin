@@ -15,6 +15,15 @@ import org.w3c.dom.Node;
 import hybristools.utils.XmlUtils;
 
 public class Extension {
+
+    public static Extension create(File folder, File platformHome) {
+        if (new File(folder, Constants.PROJECT_PROPERTIES).isFile()
+                || new File(folder, Constants.EXTENSIONINFO_FILE_NAME).isFile()) {
+            return new Extension(folder, platformHome);
+        }
+        return null;
+    }
+
     private final File platformHome;
 
     static enum Type {
@@ -36,7 +45,7 @@ public class Extension {
     private boolean localExtension;
     private String name;
 
-    public Extension(File folder, File platformHome) {
+    private Extension(File folder, File platformHome) {
         this.folder = folder;
         this.platformHome = platformHome;
         String path = folder.getAbsolutePath().replace('\\', '/');

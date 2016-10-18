@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hybris
 Bundle-SymbolicName: hybris;singleton:=true
-Bundle-Version: 1.1.1.qualifier
+Bundle-Version: 1.2.1.qualifier
 Bundle-Vendor: M.Gagauz
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.ui,
@@ -14,5 +14,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.launching;bundle-version="3.8.100",
  org.eclipse.ui.console;bundle-version="3.6.200",
  org.eclipse.debug.core;bundle-version="3.10.100",
- org.eclipse.debug.ui;bundle-version="3.11.200",
- org.eclipse.ant.launching;bundle-version="1.1.200"
+ org.eclipse.debug.ui;bundle-version="3.11.200"

@@ -8,6 +8,8 @@ public class Constants {
     public static final String HYBRIS_BIN_DIR_CLASSPATH_VARIABLE = "HYBRIS_BIN_DIR";
 
     public static final String EXTENSIONINFO_FILE_NAME = "extensioninfo.xml";
+    public static final String LOCALEXTENSIONS = "localextensions.xml";
+    public static final String PROJECT_PROPERTIES = "project.properties";
     public static final String CLASSPATH_FILE_NAME = ".classpath";
     public static final String PROJECT_FILE_NAME = ".project";
     public static final String SETTINGS_FILE_NAME = ".settings";

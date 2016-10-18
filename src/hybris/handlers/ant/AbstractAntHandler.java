@@ -45,6 +45,7 @@ public class AbstractAntHandler extends AbstractHandler {
                         } else {
                             return Status.CANCEL_STATUS;
                         }
+                        ResourcesPlugin.getWorkspace().getRoot().refreshLocal(3, monitor);
                         return Status.OK_STATUS;
                     } catch (Exception e) {
                         return new Status(IStatus.ERROR, "hybris", e.getMessage(), e);

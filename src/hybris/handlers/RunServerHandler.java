@@ -1,7 +1,9 @@
 package hybris.handlers;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,7 +27,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.ISourceLocator;
-import org.eclipse.debug.core.model.RuntimeProcess;
 import org.eclipse.debug.core.sourcelookup.ISourceContainer;
 import org.eclipse.debug.core.sourcelookup.ISourceLookupDirector;
 import org.eclipse.debug.core.sourcelookup.ISourcePathComputer;
@@ -73,8 +74,16 @@ public class RunServerHandler extends AbstractHandler {
 
                         ILaunch launch = new Launch(null, ILaunchManager.RUN_MODE, getSourceLocator());
 
-                        IProcess procc = new RuntimeProcess(launch, proccess, "Hybris server", null);
-                        procc.setAttribute(IProcess.ATTR_PROCESS_TYPE, IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION);
+                        String timestamp = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM)
+                                .format(new Date(System.currentTimeMillis()));
+                        IProcess process = DebugPlugin.newProcess(launch, proccess, "Hybris server");
+                        process.setAttribute(DebugPlugin.ATTR_PATH, commands.get(0));
+                        process.setAttribute(IProcess.ATTR_CMDLINE,
+                                DebugPlugin.renderArguments(commands.toArray(new String[commands.size()]), null));
+                        String ltime = launch.getAttribute(DebugPlugin.ATTR_LAUNCH_TIMESTAMP);
+                        process.setAttribute(DebugPlugin.ATTR_LAUNCH_TIMESTAMP, ltime != null ? ltime : timestamp);
+                        process.setAttribute(DebugPlugin.ATTR_WORKING_DIRECTORY, platformProject.getLocation().toFile().getAbsolutePath());
+                        process.setAttribute(IProcess.ATTR_PROCESS_TYPE, IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION);
                         consoleManager.launchAdded(launch);
                         return Status.OK_STATUS;
                     } catch (Exception e) {

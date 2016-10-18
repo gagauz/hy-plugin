@@ -52,7 +52,7 @@ public abstract class AbstractClasspathFixerHandler extends AbstractHandler {
                         ExtensionResolver.CACHE.clear();
                         for (IProject project : projects) {
                             if (!monitor.isCanceled()) {
-                                new ExtensionFixer(new Extension(project.getLocation().toFile(), platformProject.getLocation().toFile()))
+                                new ExtensionFixer(Extension.create(project.getLocation().toFile(), platformProject.getLocation().toFile()))
                                         .fix(SubMonitor.convert(monitor));
                                 monitor.worked(1);
                             } else {

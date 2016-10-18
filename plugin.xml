@@ -10,7 +10,7 @@
 		<command categoryId="hybris.commands.category"
 		         defaultHandler="hybris.handlers.ant.AntAllHandler"
 		         id="hybris.commands.antCleanAll"
-		         name="Build and deploy platform">
+		         name="Ant clean all">
 		</command>
 		<command categoryId="hybris.commands.category"
 		         defaultHandler="hybris.handlers.ant.AntBuildExtensionHandler"
@@ -21,10 +21,6 @@
 		         id="hybris.commands.DebugServer"
 		         name="Debug server">
 		</command>
-		<command defaultHandler="hybris.handlers.RunServerHandler"
-		         id="hybris.commands.RunServer"
-		         name="Run server">
-		</command>
 	</extension>
 	<extension point="org.eclipse.ui.bindings">
 	</extension>
@@ -33,29 +29,25 @@
 			<menu id="hybris.menus.hybrisMenu" label="Hybris" mnemonic="Y">
 				<command commandId="hybris.commands.fixClasspath"
 				         id="hybris.menus.fixClasspath"
-				         label="Fix extensions classpaths"
+				         label="Fix .classpath files"
 				         mnemonic="F">
 				</command>
 				<command commandId="hybris.commands.antCleanAll"
 				         id="hybris.menus.antCleanAll"
-				         label="Build and deploy platform">
+				         label="Ant clean all">
 				</command>
 				<command commandId="hybris.commands.DebugServer"
-				         label="Debug server"
+				         label="Debug hybris server"
 				         style="push">
 				</command>
 				<command commandId="hybris.commands.antCreateExtension"
-				         label="Create extension"
-				         style="push">
-				</command>
-				<command commandId="hybris.commands.RunServer"
-				         label="Run server"
+				         label="Create hybris extension"
 				         style="push">
 				</command>
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
-			<menu commandId="hybris.command.andBuildExtension"
+			<menu commandId="hybris.commands.andBuildExtension"
 			      icon="icons/ECP_logo_temp.gif"
 			      id="hybris.context.menu.hybrisPopup"
 			      label="Hybris">

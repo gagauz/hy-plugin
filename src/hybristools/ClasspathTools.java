@@ -5,26 +5,21 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class ClasspathTools {
-    public static void createSrcClasspathEntry(Node node, String path, String output, boolean export) {
-        createElement(node, "classpathentry", "kind", "src", "path", path, "output", output, "exported", String.valueOf(export));
+    public static Element createSrcClasspathEntry(Node node, String path, String output, boolean export) {
+        return createElement(node, "classpathentry", "kind", "src", "path", path, "output", output, "exported", String.valueOf(export));
     }
 
-    public static void createSrcClasspathEntry(Node node, String path, boolean export) {
-        createElement(node, "classpathentry", "kind", "src", "path", path, "exported", String.valueOf(export));
+    public static Element createSrcClasspathEntry(Node node, String path, boolean export) {
+        return createElement(node, "classpathentry", "kind", "src", "path", path, "exported", String.valueOf(export));
     }
 
-    public static void createLibClasspathEntry(Node node, String path, boolean export) {
-        createElement(node, "classpathentry", "kind", "lib", "path", path, "exported", String.valueOf(export));
+    public static Element createLibClasspathEntry(Node node, String path, boolean export) {
+        return createElement(node, "classpathentry", "kind", "lib", "path", path, "exported", String.valueOf(export));
     }
 
-    public static void createLibClasspathEntry(Node node, String path, String sourcepath, boolean export) {
-        createElement(node, "classpathentry", "kind", "lib", "path", path, "sourcepath", sourcepath, "exported", String.valueOf(export));
-    }
-
-    public static void createSrcFolder(Extension extension, Node node, String path, String output, boolean exported) {
-        if (extension.hasFolder(path)) {
-            createSrcClasspathEntry(node, path, output, exported);
-        }
+    public static Element createLibClasspathEntry(Node node, String path, String sourcepath, boolean export) {
+        return createElement(node, "classpathentry", "kind", "lib", "path", path, "sourcepath", sourcepath, "exported",
+                String.valueOf(export));
     }
 
     public static void createSrcFolder(Extension extension, Node node, String path, String output, boolean exported, String including) {
@@ -52,7 +47,7 @@ public class ClasspathTools {
         }
     }
 
-    public static void createElement(Node node, String name, String... nameAndValues) {
+    public static Element createElement(Node node, String name, String... nameAndValues) {
         Document doc = node.getOwnerDocument();
 
         Element element = doc.createElement(name);
@@ -60,5 +55,6 @@ public class ClasspathTools {
             element.setAttribute(nameAndValues[i], nameAndValues[i + 1]);
         }
         node.appendChild(element);
+        return element;
     }
 }

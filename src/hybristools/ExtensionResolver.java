@@ -15,9 +15,11 @@ public class ExtensionResolver {
                 return;
             }
             if (new File(v, Constants.EXTENSIONINFO_FILE_NAME).isFile()) {
-                Extension e = new Extension(v, platformHome);
-                System.out.println("Add extension " + e.getName());
-                CACHE.putIfAbsent(e.getName(), e);
+                Extension e = Extension.create(v, platformHome);
+                if (null != e) {
+                    System.out.println("Add extension " + e.getName());
+                    CACHE.putIfAbsent(e.getName(), e);
+                }
                 return;
             }
         };

@@ -6,7 +6,9 @@ import static hybristools.ClasspathTools.createSrcClasspathEntry;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -15,6 +17,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -57,6 +60,9 @@ public class PlatformClasspathFixer {
                     while (node.hasChildNodes())
                         node.removeChild(node.getFirstChild());
 
+                    final Map<String, Element> nodeMap = new HashMap<>();
+                    final Map<String, File> sourceMap = new HashMap<>();
+
                     createElement(node, "classpathentry", "kind", "output", "path", "eclipsebin/notused");
                     createElement(node, "classpathentry", "kind", "con", "path", "org.eclipse.jdt.launching.JRE_CONTAINER");
                     createElement(node, "classpathentry", "kind", "src", "path", "/config", "exported", "true");
@@ -72,10 +78,16 @@ public class PlatformClasspathFixer {
                     addedJars.add("jrebel-activation.jar");
 
                     Consumer<File> fetchJar = f -> {
-                        if (addedJars.add(f.getName()) && !f.getName().endsWith("-sources.jar")) {
-                            IPath jarPath = new Path(f.getAbsolutePath());
-                            String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
-                            createLibClasspathEntry(node, jarPathString, true);
+                        if (addedJars.add(f.getName())) {
+                            if (f.getName().endsWith("-sources.jar")) {
+                                String jar = f.getName().replace("-sources.jar", ".jar");
+                                sourceMap.put(jar, f);
+                            } else {
+                                IPath jarPath = new Path(f.getAbsolutePath());
+                                String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
+                                Element el = createLibClasspathEntry(node, jarPathString, true);
+                                nodeMap.put(f.getName(), el);
+                            }
                         }
                     };
 
@@ -86,13 +98,7 @@ public class PlatformClasspathFixer {
 
                     new LocalExtensionVisitor(platform.getFolder()).visit(ext -> {
                         if (addedJars.add(ext.getFolder().getAbsolutePath())) {
-                            new JarFetcher(ext.getFolder(), "bin", "lib", "web/webroot/WEB-INF/lib").fetch(jar -> {
-                                if (addedJars.add(jar.getName())) {
-                                    IPath jarPath = new Path(jar.getAbsolutePath());
-                                    String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
-                                    createLibClasspathEntry(node, jarPathString, true);
-                                }
-                            });
+                            new JarFetcher(ext.getFolder(), "bin", "lib", "web/webroot/WEB-INF/lib").fetch(fetchJar);
                             if (ImportOption.CUSTOM_ONLY.is()) {
                                 if (ext.hasFolder("classes") && addedJars.add(ext.getFolder().getAbsolutePath() + "/classes")) {
                                     IPath jarPath = new Path(ext.getFolder().getAbsolutePath() + "/classes");
@@ -115,10 +121,8 @@ public class PlatformClasspathFixer {
                             if (addedJars.add(f0.getAbsolutePath())) {
                                 if (!ImportOption.ALL.is() || !hasProject(f0.getName())) {
                                     new DirVisitor(f0, 2).visitRecursive(f -> {
-                                        if (f.getName().endsWith(".jar") && addedJars.add(f.getName())) {
-                                            IPath jarPath = new Path(f.getAbsolutePath());
-                                            String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
-                                            createLibClasspathEntry(node, jarPathString, true);
+                                        if (f.getName().endsWith(".jar")) {
+                                            fetchJar.accept(f);
                                         } else if (f.isDirectory() && new File(f, "extensioninfo.xml").isFile()) {
                                             if (new File(f, "src").isDirectory()) {
                                                 IPath jarPath = new Path(f.getAbsolutePath() + "/src");
@@ -136,6 +140,15 @@ public class PlatformClasspathFixer {
                                 }
                             }
                         }
+                    });
+
+                    sourceMap.forEach((k, v) -> {
+                        nodeMap.computeIfPresent(k, (k0, v0) -> {
+                            IPath jarPath = new Path(v.getAbsolutePath());
+                            String jarPathString = jarPath.makeRelativeTo(platformPath).toPortableString();
+                            v0.setAttribute("sourcepath", jarPathString);
+                            return v0;
+                        });
                     });
 
                     break;
