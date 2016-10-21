@@ -7,8 +7,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import hybristools.JdtCorePrefsCleaner;
-import hybristools.LocalExtensionVisitor;
+import hybris.extension.JdtCorePrefsCleaner;
+import hybris.extension.LocalExtensionVisitor;
 
 public class JdtCorePrefsCleanHandler extends AbstractHandler {
 

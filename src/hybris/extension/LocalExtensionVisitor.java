@@ -1,4 +1,4 @@
-package hybristools;
+package hybris.extension;
 
 import java.io.File;
 import java.util.HashSet;
@@ -17,12 +17,20 @@ public class LocalExtensionVisitor {
     private static Set<Extension> localExtensions = new HashSet<>();
 
     public LocalExtensionVisitor(File platformFolder) {
+        localExtensions.clear();
         this.platformFolder = platformFolder;
         ExtensionDependecyVisitor.reset();
         ExtensionResolver.clearCache();
     }
 
     public void visit(Consumer<Extension> handler) {
+
+        Consumer<Extension> checkHandler = ext -> {
+            if (localExtensions.add(ext)) {
+                handler.accept(ext);
+            }
+        };
+
         File localExtension = new File(platformFolder.getParentFile().getParentFile(), "/config/localextensions.xml");
 
         if (localExtension.isFile()) {
@@ -37,11 +45,8 @@ public class LocalExtensionVisitor {
                         Extension extension = ExtensionResolver.findExtension(LocalExtensionVisitor.this.platformFolder, extName);
                         if (null != extension) {
                             extension.setLocalExtension(true);
-                            localExtensions.add(extension);
-                            if (null != handler) {
-                                handler.accept(extension);
-                            }
-                            new ExtensionDependecyVisitor(extension).visit(handler);
+                            checkHandler.accept(extension);
+                            new ExtensionDependecyVisitor(extension).visit(checkHandler);
                         } else {
                             System.err.println("Ext folder " + extName + " is not found");
                         }

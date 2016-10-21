@@ -1,4 +1,4 @@
-package hybristools;
+package hybris.classpath;
 
 import java.io.File;
 import java.io.InputStream;
@@ -17,6 +17,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import hybris.ant.DirVisitor;
+import hybris.ant.ImportOption;
+import hybris.extension.ClasspathTools;
+import hybris.extension.Extension;
 import hybristools.utils.XmlUtils;
 
 public class CustomClasspathFixer extends ClasspathTools {

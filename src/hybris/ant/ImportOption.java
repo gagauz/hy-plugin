@@ -1,4 +1,4 @@
-package hybristools;
+package hybris.ant;
 
 public enum ImportOption {
 

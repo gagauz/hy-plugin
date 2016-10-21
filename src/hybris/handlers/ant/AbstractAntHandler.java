@@ -8,18 +8,29 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
+import hybris.ant.AntCommand;
 import hybris.messages.Messages;
-import hybristools.AntCommand;
 
 public class AbstractAntHandler extends AbstractHandler {
 
-    protected IProject getTarget(ExecutionEvent event) {
-        return ResourcesPlugin.getWorkspace().getRoot().getProject("platform");
+    protected IJavaProject getTarget(ExecutionEvent event) {
+        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("platform");
+        try {
+            if (project.hasNature(JavaCore.NATURE_ID)) {
+                return JavaCore.create(project);
+            }
+        } catch (CoreException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     protected List<String> getArguments() {
@@ -29,9 +40,9 @@ public class AbstractAntHandler extends AbstractHandler {
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
 
-        IProject targetProject = getTarget(event);
+        IJavaProject targetProject = getTarget(event);
 
-        if (targetProject.exists()) {
+        if (null != targetProject && targetProject.exists()) {
 
             Job job = new Job(Messages.WizardProjectsImportPage_runningAntAll) {
                 @Override
@@ -39,8 +50,8 @@ public class AbstractAntHandler extends AbstractHandler {
                     try {
                         monitor.beginTask(Messages.WizardProjectsImportPage_runningAntAll, 1);
                         if (!monitor.isCanceled()) {
-                            new AntCommand(targetProject.getLocation(), getArguments())
-                                    .accept(targetProject.getLocation().toFile(), monitor);
+                            new AntCommand(targetProject.getProject().getLocation(), getArguments())
+                                    .accept(targetProject.getProject().getLocation().toFile(), monitor);
                             monitor.worked(1);
                         } else {
                             return Status.CANCEL_STATUS;

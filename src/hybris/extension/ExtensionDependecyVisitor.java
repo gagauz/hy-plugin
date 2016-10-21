@@ -1,4 +1,4 @@
-package hybristools;
+package hybris.extension;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -20,11 +20,11 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import hybris.ant.ImportOption;
+import hybris.extension.Extension;
+import hybris.extension.ExtensionFixer;
+import hybris.extension.ExtensionResolver;
 import hybris.messages.Messages;
-import hybristools.Extension;
-import hybristools.ExtensionFixer;
-import hybristools.ExtensionResolver;
-import hybristools.ImportOption;
 
 public abstract class AbstractClasspathFixerHandler extends AbstractHandler {
 

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hybrisconfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="resources/schemas/extensions.xsd">
+	<extensions>
+		<!-- 
+				All extensions located in ${HYBRIS_BIN_DIR}/platform/ext are automatically loaded. 
+				More information about how to configure available extensions can be found here : https://wiki.hybris.com/x/nZVzC
+		-->
+				
+		<path dir="${HYBRIS_BIN_DIR}" />
+		<!--<path autoload="true" dir="${HYBRIS_BIN_DIR}/custom"/>-->
+		
+		<!-- lynx-core -->
+		<extension name="amwaycore" />
+		<extension name="amwayfacades"/>
+
+		<!--TODO re-enable after global core team migrates to 6.1-->
+		<!--<extension name="amwaycommercewebservices"/>-->
+
+		<extension name="amwaydms"/>
+		<extension name="amwaylos"/>
+		<extension name="amwaycontentsolrsearchaddon" />
+
+
+		<!-- ext-platform -->
+		<extension name="hmc" />
+		<extension name="platformhmc" />
+		<extension name="platformwebservices" />
+		<extension name="commerceservices" />
+		<extension name="basecommerce" />
+		<extension name="backoffice" />
+		<extension name="basecommercebackoffice" />
+		<extension name="commercesearchbackoffice" />
+
+		<extension name="commerceservicesbackoffice" />
+		<!--<extension name='warehousingbackoffice' /> -->
+		<extension name="solrfacetsearchbackoffice" />
+
+		<extension name="platformbackoffice" />
+		<extension name='warehousing' />
+		<extension name="solrfacetsearch" />
+		<extension name="solrserver" />
+		<extension name="admincockpit" />
+		<extension name="cockpit" />
+		<extension name="productcockpit" />
+		<extension name="admincockpit" />
+		<extension name="mcc" />
+		<extension name="wishlist" />
+		<extension name="commercefacades" />
+		<extension name="addonsupport" />
+		<extension name="amazoncloud" />
+
+		<!-- sample store -->
+		<!--<extension name="lynxdcommercesamplesite"/>--> 
+		
+		<!-- amway point of sale -->
+		<!--extension name="amwaypos" /-->
+
+		<!-- EIA extensions -->
+        <extension name="lynxbackoffice"/>
+		<extension name="lynxcockpits" />
+		<extension name="lynxfulfilmentprocess" />
+		<extension name="lynxstorefront" />
+		<extension name="lynxeubasestore" />
+		<extension name="lynxintegrationtest" />
+		<extension name="lynxswestore" />
+		<extension name="lynxdnkstore" />
+		<extension name="lynxfinstore" />
+		<extension name="lynxnorstore" />
+		<extension name="lynxproductintegration" />
+
+	</extensions>
+</hybrisconfig>

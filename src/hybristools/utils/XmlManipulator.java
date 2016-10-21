@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -68,6 +69,24 @@ public class XmlManipulator {
         }
     }
 
+    private Node createNodes(Node parentNode, String entryPath) throws Exception {
+        final String[] nodeNames = entryPath.split("/", 2);
+        List<Node> nodeList = getChildNodes(parentNode, nodeNames[0]);
+        if (nodeList.isEmpty() || nodeNames.length == 1) {
+            Node child = getDoc().createElement(nodeNames[0]);
+            parentNode.appendChild(child);
+            nodeList.add(child);
+        }
+        Node lastNode = null;
+        for (Node node : nodeList) {
+            if (nodeNames.length != 1) {
+                return createNodes(node, nodeNames[1]);
+            }
+            lastNode = node;
+        }
+        return lastNode;
+    }
+
     private List<Node> getChildNodes(Node parentNode, String name) {
         NodeList children = parentNode.getChildNodes();
         int length = children.getLength();
@@ -85,5 +104,21 @@ public class XmlManipulator {
     @Override
     public String toString() {
         return xmlFile.toString();
+    }
+
+    public void addNode(String entryPath, String value, String... attrNamesAndValues) throws Exception {
+        Node node = createNodes(getDoc(), entryPath);
+        if (null != value) {
+            node.setTextContent(value);
+        }
+        NamedNodeMap attrMap = node.getAttributes();
+        for (int i = 0; i < attrNamesAndValues.length; i += 2) {
+            Node attr = attrMap.getNamedItem(attrNamesAndValues[i]);
+            if (null == attr) {
+                attr = getDoc().createAttribute(attrNamesAndValues[i]);
+            }
+            attr.setNodeValue(attrNamesAndValues[i + 1]);
+            attrMap.setNamedItem(attr);
+        }
     }
 }

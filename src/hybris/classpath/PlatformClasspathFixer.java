@@ -1,8 +1,8 @@
-package hybristools;
+package hybris.classpath;
 
-import static hybristools.ClasspathTools.createElement;
-import static hybristools.ClasspathTools.createLibClasspathEntry;
-import static hybristools.ClasspathTools.createSrcClasspathEntry;
+import static hybris.extension.ClasspathTools.createElement;
+import static hybris.extension.ClasspathTools.createLibClasspathEntry;
+import static hybris.extension.ClasspathTools.createSrcClasspathEntry;
 
 import java.io.File;
 import java.util.Arrays;
@@ -21,6 +21,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import hybris.ant.DirVisitor;
+import hybris.ant.ImportOption;
+import hybris.extension.Extension;
+import hybris.extension.JarFetcher;
+import hybris.extension.LocalExtensionVisitor;
 import hybristools.utils.XmlUtils;
 
 public class PlatformClasspathFixer {
@@ -29,6 +34,21 @@ public class PlatformClasspathFixer {
     public PlatformClasspathFixer(Extension platform) {
         this.platform = platform;
     }
+
+    /*
+     Implement resource filters
+      <filteredResources>
+        <filter>
+            <id>1477042328867</id>
+            <name></name>
+            <type>10</type>
+            <matcher>
+                <id>org.eclipse.ui.ide.multiFilter</id>
+                <arguments>1.0-name-matches-false-false-ext</arguments>
+            </matcher>
+        </filter>
+    </filteredResources>
+     */
 
     public void fixClasspath() {
 

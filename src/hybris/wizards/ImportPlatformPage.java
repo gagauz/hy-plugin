@@ -1,4 +1,4 @@
-package hybris.importWizards;
+package hybris.wizards;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -23,6 +22,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -53,8 +53,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.WizardDataTransferPage;
 import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
@@ -63,13 +61,13 @@ import org.eclipse.ui.internal.wizards.datatransfer.ArchiveFileManipulations;
 import org.eclipse.ui.internal.wizards.datatransfer.ILeveledImportStructureProvider;
 import org.eclipse.ui.statushandlers.StatusManager;
 
+import hybris.ant.ImportOption;
+import hybris.extension.Extension;
+import hybris.extension.ExtensionFixer;
+import hybris.extension.ExtensionFixer.Holder;
+import hybris.extension.ExtensionResolver;
+import hybris.extension.LocalExtensionVisitor;
 import hybris.messages.Messages;
-import hybristools.Extension;
-import hybristools.ExtensionFixer;
-import hybristools.ExtensionFixer.Holder;
-import hybristools.ExtensionResolver;
-import hybristools.ImportOption;
-import hybristools.LocalExtensionVisitor;
 import hybristools.utils.EclipseUtils;
 
 public class ImportPlatformPage extends WizardDataTransferPage {
@@ -863,53 +861,30 @@ public class ImportPlatformPage extends WizardDataTransferPage {
         try {
             SubMonitor subMonitor = SubMonitor.convert(mon, 4);
             String projectName = record.getProjectName();
-            final IWorkspace workspace = ResourcesPlugin.getWorkspace();
-            final IProject project = workspace.getRoot().getProject(projectName);
 
             new ExtensionFixer(record.extension).fix(SubMonitor.convert(mon));
 
             subMonitor.worked(1);
             IPath locationPath = new Path(record.extension.getProject().getAbsolutePath());
-
-            IProjectDescription description = null;
-            if (locationPath.toFile().exists()) {
-                description = workspace.loadProjectDescription(locationPath);
-            } else {
-                description = workspace.newProjectDescription(projectName);
-                description.setLocation(locationPath);
-            }
-
             subMonitor.worked(1);
-
-            SubMonitor subTask = subMonitor.split(1).setWorkRemaining(100);
-            subTask.setTaskName(Messages.WizardProjectsImportPage_CreateProjectsTask);
-            project.create(description, subTask.split(30));
-            project.open(IResource.BACKGROUND_REFRESH, subTask.split(70));
-            record.project = project;
+            record.project = EclipseUtils.createProject(locationPath, projectName, subMonitor);
 
             subMonitor.worked(1);
 
             if (createWorkingSetsFlag) {
                 SubMonitor subMonitor0 = SubMonitor.convert(mon, 3);
                 subMonitor0.worked(1);
-                IWorkingSetManager wsManager = workbench.getWorkingSetManager();
+
+                IAdaptable adaptable = null != record.project.getAdapter(IJavaProject.class)
+                        ? record.project.getAdapter(IJavaProject.class)
+                        : record.project;
+
                 if (record.extension.isCustom()) {
-                    IWorkingSet customWS = wsManager.getWorkingSet(Messages.WorkingSet_Custom);
-                    if (null == customWS) {
-                        customWS = wsManager.createWorkingSet(Messages.WorkingSet_Custom, new IAdaptable[0]);
-                        wsManager.addWorkingSet(customWS);
-                        subMonitor0.worked(1);
-                    }
-                    wsManager.addToWorkingSets(record.project, new IWorkingSet[] { customWS });
+                    EclipseUtils.addProjectToWorkingSet(workbench, Messages.WorkingSet_Custom, adaptable);
+                    subMonitor0.worked(1);
                 } else {
-                    IWorkingSet platformWS = wsManager.getWorkingSet(Messages.WorkingSet_Platform);
-                    if (null == platformWS) {
-                        platformWS = wsManager.createWorkingSet(Messages.WorkingSet_Platform, new IAdaptable[0]);
-                        wsManager.addWorkingSet(platformWS);
-                        subMonitor0.worked(1);
-                    }
-                    wsManager.addToWorkingSets(record.project, new IWorkingSet[] { platformWS });
-                    subMonitor0.done();
+                    EclipseUtils.addProjectToWorkingSet(workbench, Messages.WorkingSet_Platform, adaptable);
+                    subMonitor0.worked(1);
                 }
             }
 

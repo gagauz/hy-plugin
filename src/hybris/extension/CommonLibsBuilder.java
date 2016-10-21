@@ -1,4 +1,4 @@
-package hybristools;
+package hybris.extension;
 
 import java.io.File;
 import java.util.Arrays;
@@ -11,6 +11,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
+
+import hybris.ant.DirVisitor;
 
 public class CommonLibsBuilder {
     private final File platformHome;

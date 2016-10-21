@@ -1,4 +1,4 @@
-package hybristools;
+package hybris.extension;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -12,13 +12,15 @@ import java.util.function.Predicate;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import hybris.Constants;
 import hybristools.utils.XmlUtils;
 
 public class Extension {
 
     public static Extension create(File folder, File platformHome) {
         if (new File(folder, Constants.PROJECT_PROPERTIES).isFile()
-                || new File(folder, Constants.EXTENSIONINFO_FILE_NAME).isFile()) {
+                || new File(folder, Constants.EXTENSIONINFO_FILE_NAME).isFile()
+                || new File(folder, Constants.LOCALEXTENSIONS).isFile()) {
             return new Extension(folder, platformHome);
         }
         return null;

@@ -21,44 +21,82 @@
 		         id="hybris.commands.DebugServer"
 		         name="Debug server">
 		</command>
+		<command id="hybris.commands.CreateExtensionCommand"
+		         name="Create hybris extension">
+		</command>
 	</extension>
 	<extension point="org.eclipse.ui.bindings">
 	</extension>
 	<extension point="org.eclipse.ui.menus">
 		<menuContribution locationURI="menu:org.eclipse.ui.main.menu?after=additions">
-			<menu id="hybris.menus.hybrisMenu" label="Hybris" mnemonic="Y">
+			<menu icon="icons/ECP_logo_temp.gif"
+			      id="hybris.menus.hybrisMenu"
+			      label="Hybris"
+			      mnemonic="Y">
 				<command commandId="hybris.commands.fixClasspath"
+				         icon="icons/classpath.gif"
 				         id="hybris.menus.fixClasspath"
 				         label="Fix .classpath files"
 				         mnemonic="F">
 				</command>
 				<command commandId="hybris.commands.antCleanAll"
+				         icon="icons/ant.gif"
 				         id="hybris.menus.antCleanAll"
 				         label="Ant clean all">
 				</command>
 				<command commandId="hybris.commands.DebugServer"
+				         icon="icons/ldebug_obj.gif"
 				         label="Debug hybris server"
 				         style="push">
 				</command>
-				<command commandId="hybris.commands.antCreateExtension"
+				<command commandId="org.eclipse.ui.newWizard"
+				         icon="icons/newprj_wiz.gif"
 				         label="Create hybris extension"
 				         style="push">
+					<parameter name="newWizardId"
+					           value="hybris.wizards.CreateExtensionWizard">
+					</parameter>
 				</command>
 			</menu>
 		</menuContribution>
-		<menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
-			<menu commandId="hybris.commands.andBuildExtension"
-			      icon="icons/ECP_logo_temp.gif"
-			      id="hybris.context.menu.hybrisPopup"
-			      label="Hybris">
 
+		<menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
+			<menu label="Hybris" icon="icons/ECP_logo_temp.gif">
 				<command commandId="hybris.commands.andBuildExtension"
+				         icon="icons/build_exec.gif"
 				         id="hybris.menus.andBuildExtension"
 				         label="Build extension"
 				         style="push">
 				</command>
+				<visibleWhen>
+					<with variable="activeMenuSelection">
+						<iterate>
+							<adapt type="org.eclipse.jdt.core.IJavaProject" />
+						</iterate>
+						<count value="1" />
+					</with>
+				</visibleWhen>
 			</menu>
 		</menuContribution>
+		<menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu">
+			<menu label="Hybris" icon="icons/ECP_logo_temp.gif">
+				<command commandId="hybris.commands.andBuildExtension"
+				         icon="icons/build_exec.gif"
+				         id="hybris.menus.andBuildExtension"
+				         label="Build extension"
+				         style="push">
+				</command>
+				<visibleWhen>
+					<with variable="activeMenuSelection">
+						<iterate>
+							<adapt type="org.eclipse.jdt.core.IJavaProject" />
+						</iterate>
+						<count value="1" />
+					</with>
+				</visibleWhen>
+			</menu>
+		</menuContribution>
+
 		<menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
 			<toolbar id="hybris.toolbars.hybrisToolbar">
 			</toolbar>
@@ -68,7 +106,7 @@
 		<category id="hybris.importWizards.сategory" name="Hybris">
 		</category>
 		<wizard category="hybris.importWizards.сategory"
-		        class="hybris.handlers.ImportPlatformWizard"
+		        class="hybris.wizards.ImportPlatformWizard"
 		        icon="icons/ECP_logo_temp.gif"
 		        id="hybris.importWizards.ImportHybrisWizard"
 		        name="Import hybris platform">
@@ -123,5 +161,21 @@
 		                         sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer"
 		                         type="org.eclipse.jdt.launching.localJavaApplication">
 		</launchConfigurationType>
+	</extension>
+	<extension point="org.eclipse.ui.newWizards">
+		<category id="hybris.newExtensionCategory" name="Hybris">
+		</category>
+		<wizard category="hybris.newExtensionCategory"
+		        class="hybris.wizards.CreateExtensionWizard"
+		        icon="icons/ECP_logo_temp.gif"
+		        id="hybris.wizards.CreateExtensionWizard"
+		        name="New extension">
+		</wizard>
+	</extension>
+	<extension point="org.eclipse.debug.ui.consoleLineTrackers">
+		<consoleLineTracker class="hybris.ant.AntCommandConsoleTracker"
+		                    id="hybris.ant.AntCommandTracker"
+		                    processType="hybris.ant.AntCommand">
+		</consoleLineTracker>
 	</extension>
 </plugin>

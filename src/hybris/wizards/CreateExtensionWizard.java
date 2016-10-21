@@ -1,19 +1,13 @@
-package hybris.handlers;
+package hybris.wizards;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWizard;
 
-import hybris.importWizards.ImportPlatformPage;
+public class CreateExtensionWizard extends Wizard implements IWorkbenchWizard {
 
-public class ImportPlatformWizard extends Wizard implements IImportWizard {
-
-    ImportPlatformPage mainPage;
-
-    public ImportPlatformWizard() {
-        super();
-    }
+    CreateExtensionPage mainPage;
 
     /**
      *
@@ -22,9 +16,9 @@ public class ImportPlatformWizard extends Wizard implements IImportWizard {
      */
     @Override
     public void init(IWorkbench workbench, IStructuredSelection selection) {
-        setWindowTitle("Hybris Import Wizard"); // NON-NLS-1
+        setWindowTitle("Create Hybris extension wizard"); // NON-NLS-1
         setNeedsProgressMonitor(true);
-        mainPage = new ImportPlatformPage(workbench);
+        mainPage = new CreateExtensionPage(workbench);
     }
 
     /**
@@ -42,15 +36,12 @@ public class ImportPlatformWizard extends Wizard implements IImportWizard {
      */
     @Override
     public boolean performCancel() {
-        mainPage.performCancel();
         return true;
     }
 
-    /**
-     * @see Wizard#performFinish()
-     */
     @Override
     public boolean performFinish() {
-        return mainPage.createProjects();
+        return mainPage.createExtension();
     }
+
 }

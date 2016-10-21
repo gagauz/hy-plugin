@@ -1,4 +1,4 @@
-package hybristools;
+package hybris.extension;
 
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import hybris.classpath.CustomClasspathFixer;
+import hybris.classpath.PlatformClasspathFixer;
 import hybris.messages.Messages;
 import hybristools.utils.XmlManipulator;
 

@@ -1,7 +1,9 @@
-package hybristools;
+package hybris.extension;
 
 import java.io.File;
 import java.util.function.Consumer;
+
+import hybris.ant.DirVisitor;
 
 public class JarFetcher {
     private File extension;

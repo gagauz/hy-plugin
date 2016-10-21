@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaProject;
 
 public class AntClasspathGenHandler extends AbstractAntHandler {
 
@@ -14,7 +14,7 @@ public class AntClasspathGenHandler extends AbstractAntHandler {
     }
 
     @Override
-    protected IProject getTarget(ExecutionEvent event) {
+    protected IJavaProject getTarget(ExecutionEvent event) {
         return super.getTarget(event);
     }
 }

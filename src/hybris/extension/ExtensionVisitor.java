@@ -1,4 +1,4 @@
-package hybristools;
+package hybris.extension;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import hybris.Constants;
 
 public class ExtensionVisitor {
 
