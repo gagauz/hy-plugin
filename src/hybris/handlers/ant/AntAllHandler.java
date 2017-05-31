@@ -1,5 +1,10 @@
 package hybris.handlers.ant;
 
-public class AntAllHandler extends AbstractAntHandler {
+import hybris.messages.Messages;
 
+public class AntAllHandler extends AntBuildExtensionHandler {
+
+    public AntAllHandler() {
+        super(Messages.AntCommand_CleanAllFor);
+    }
 }

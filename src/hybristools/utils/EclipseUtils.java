@@ -89,6 +89,7 @@ public class EclipseUtils {
 
     public static IProject createProject(IPath locationPath, String projectName, SubMonitor monitor)
             throws OperationCanceledException, CoreException {
+
         final IWorkspace workspace = ResourcesPlugin.getWorkspace();
         final IProject project = workspace.getRoot().getProject(projectName);
         IProjectDescription description = null;
@@ -101,7 +102,7 @@ public class EclipseUtils {
 
         SubMonitor subTask = monitor.split(1).setWorkRemaining(100);
         subTask.setTaskName(Messages.WizardProjectsImportPage_CreateProjectsTask);
-        project.create(description, subTask.split(30));
+        project.create(description, monitor.split(30));
         project.open(IResource.BACKGROUND_REFRESH, subTask.split(70));
         return project;
     }

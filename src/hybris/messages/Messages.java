@@ -23,8 +23,9 @@ public class Messages extends NLS {
     public static String WizardProjectsImportPage_fixClasspath;
     public static String WizardProjectsImportPage_fixClasspathFor;
     public static String WizardProjectsImportPage_runningAntAll;
-    public static String WizardProjectsImportPage_runningAntClasspathgen;
-    public static String WizardProjectsImportPage_runningAntClasspathgenFor;
+    public static String AntCommand_BuildFor;
+    public static String AntCommand_GensourceFor;
+    public static String AntCommand_CleanAllFor;
 
     public static String WizardProjectsImportPage_CreateProjectFile;
 

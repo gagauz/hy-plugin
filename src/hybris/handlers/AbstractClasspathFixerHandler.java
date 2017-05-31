@@ -59,6 +59,7 @@ public abstract class AbstractClasspathFixerHandler extends AbstractHandler {
                                 return Status.CANCEL_STATUS;
                             }
                         }
+                        //new CommonLibsBuilder(platformProject.getLocation().toFile()).build(monitor);
 
                         return Status.OK_STATUS;
                     } catch (Exception e) {

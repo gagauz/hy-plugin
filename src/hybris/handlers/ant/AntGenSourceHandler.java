@@ -6,11 +6,17 @@ import java.util.List;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.jdt.core.IJavaProject;
 
-public class AntClasspathGenHandler extends AbstractAntHandler {
+import hybris.messages.Messages;
+
+public class AntGenSourceHandler extends AntBuildExtensionHandler {
+
+    public AntGenSourceHandler() {
+        super(Messages.AntCommand_GensourceFor);
+    }
 
     @Override
     protected List<String> getArguments() {
-        return Arrays.asList("classpathgen");
+        return Arrays.asList("gensource");
     }
 
     @Override

@@ -19,6 +19,7 @@ import org.eclipse.debug.core.model.RuntimeProcess;
 import org.eclipse.debug.core.sourcelookup.ISourceLookupDirector;
 import org.eclipse.debug.internal.ui.views.console.ProcessConsoleManager;
 import org.eclipse.jdt.internal.launching.JavaSourceLookupDirector;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 public class AntCommand {
     private static final Map<String, Integer> estimatedWork = new HashMap<>();
@@ -58,14 +59,21 @@ public class AntCommand {
             Process antProccess = Runtime.getRuntime().exec(processCommands.toArray(new String[processCommands.size()]),
                     envsList.toArray(new String[envsList.size()]),
                     ext);
-            IProcess procc = new RuntimeProcess(launch, antProccess, commandName, null);
+
+            final Map<String, String> attributeMap = new HashMap<>();
             for (int i = 0; i < attrNameAndValues.length; i = i + 2) {
-                procc.setAttribute(attrNameAndValues[i], attrNameAndValues[i + 1]);
+                attributeMap.put(attrNameAndValues[i], attrNameAndValues[i + 1]);
             }
+            if (!attributeMap.containsKey(IProcess.ATTR_PROCESS_TYPE)) {
+                attributeMap.put(IProcess.ATTR_PROCESS_TYPE, IJavaLaunchConfigurationConstants.ID_JAVA_PROCESS_TYPE);
+            }
+
+            IProcess procc = new RuntimeProcess(launch, antProccess, commandName, attributeMap);
+
             consoleManager.launchAdded(launch);
             int result = antProccess.waitFor();
             subMonitor.done();
-            consoleManager.launchRemoved(launch);
+            //consoleManager.launchRemoved(launch);
             return result;
         } catch (IOException e) {
             e.printStackTrace();

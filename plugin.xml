@@ -17,6 +17,11 @@
 		         id="hybris.commands.andBuildExtension"
 		         name="Ant build extension">
 		</command>
+		<command categoryId="hybris.commands.category"
+		         defaultHandler="hybris.handlers.ant.AntGenSourceHandler"
+		         id="hybris.commands.antGenSource"
+		         name="Ant gensource">
+		</command>
 		<command defaultHandler="hybris.handlers.DebugServerHandler"
 		         id="hybris.commands.DebugServer"
 		         name="Debug server">
@@ -68,6 +73,13 @@
 				         label="Build extension"
 				         style="push">
 				</command>
+    <command
+          commandId="hybris.commands.antGenSource"
+          icon="icons/classpath.gif"
+          id="hybris.menus.antClasspathGen"
+          label="Generate source"
+          style="push">
+    </command>
 				<visibleWhen>
 					<with variable="activeMenuSelection">
 						<iterate>
@@ -86,6 +98,13 @@
 				         label="Build extension"
 				         style="push">
 				</command>
+    <command
+          commandId="hybris.commands.antGenSource"
+          icon="icons/classpath.gif"
+          id="hybris.menus.antClasspathGen"
+          label="Generate source"
+          style="push">
+    </command>
 				<visibleWhen>
 					<with variable="activeMenuSelection">
 						<iterate>

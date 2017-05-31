@@ -5,6 +5,7 @@ import java.io.FilenameFilter;
 
 public class Constants {
 
+    public static final String CUSTOM_PROJECT_CP_LIB = "Common libs";
     public static final String HYBRIS_BIN_DIR_CLASSPATH_VARIABLE = "HYBRIS_BIN_DIR";
 
     public static final String EXTENSIONINFO_FILE_NAME = "extensioninfo.xml";

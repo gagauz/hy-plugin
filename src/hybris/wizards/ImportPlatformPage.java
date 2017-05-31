@@ -865,7 +865,7 @@ public class ImportPlatformPage extends WizardDataTransferPage {
             new ExtensionFixer(record.extension).fix(SubMonitor.convert(mon));
 
             subMonitor.worked(1);
-            IPath locationPath = new Path(record.extension.getProject().getAbsolutePath());
+            IPath locationPath = new Path(record.extension.getFolder().getAbsolutePath());
             subMonitor.worked(1);
             record.project = EclipseUtils.createProject(locationPath, projectName, subMonitor);
 

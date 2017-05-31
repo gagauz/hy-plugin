@@ -17,11 +17,19 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import hybris.ant.AntCommand;
-import hybris.messages.Messages;
 
 public class AbstractAntHandler extends AbstractHandler {
+    private final String message;
+
+    public AbstractAntHandler(String message) {
+        this.message = message;
+    }
 
     protected IJavaProject getTarget(ExecutionEvent event) {
+        return getPlatformProject();
+    }
+
+    protected IJavaProject getPlatformProject() {
         IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("platform");
         try {
             if (project.hasNature(JavaCore.NATURE_ID)) {
@@ -44,13 +52,13 @@ public class AbstractAntHandler extends AbstractHandler {
 
         if (null != targetProject && targetProject.exists()) {
 
-            Job job = new Job(Messages.WizardProjectsImportPage_runningAntAll) {
+            Job job = new Job(message) {
                 @Override
                 public IStatus run(IProgressMonitor monitor) {
                     try {
-                        monitor.beginTask(Messages.WizardProjectsImportPage_runningAntAll, 1);
+                        monitor.beginTask(message, 1);
                         if (!monitor.isCanceled()) {
-                            new AntCommand(targetProject.getProject().getLocation(), getArguments())
+                            new AntCommand(getPlatformProject().getProject().getLocation(), getArguments())
                                     .accept(targetProject.getProject().getLocation().toFile(), monitor);
                             monitor.worked(1);
                         } else {

@@ -1,5 +1,7 @@
 package hybris.extension;
 
+import java.io.File;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -31,7 +33,13 @@ public class ClasspathTools {
 
     public static void createMultipleSrcFolder(Extension extension, Node node, String[] sources, String output, boolean exported) {
         for (String src : sources) {
-            if (extension.hasFolder(src)) {
+            if (src.endsWith("*")) {
+                src = src.replace('/', File.separatorChar);
+                extension.matchFolders(src).forEach(p -> {
+                    String path = extension.getFolder().toPath().relativize(p).toString();
+                    createSrcClasspathEntry(node, path, output, exported);
+                });
+            } else if (extension.hasFolder(src)) {
                 createSrcClasspathEntry(node, src, output, exported);
             }
         }

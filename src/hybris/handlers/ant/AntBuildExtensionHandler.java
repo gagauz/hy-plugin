@@ -13,11 +13,21 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import hybris.messages.Messages;
+
 public class AntBuildExtensionHandler extends AbstractAntHandler {
+
+    public AntBuildExtensionHandler() {
+        super(Messages.AntCommand_BuildFor);
+    }
+
+    public AntBuildExtensionHandler(String string) {
+        super(string);
+    }
 
     @Override
     protected List<String> getArguments() {
-        return Arrays.asList("build");
+        return Arrays.asList("clean", "build");
     }
 
     @Override
@@ -54,65 +64,8 @@ public class AntBuildExtensionHandler extends AbstractAntHandler {
                 }
             }
             return null;
-            /*
-             * Object firstSegmentObj = treePath.getFirstSegment(); IProject
-             * theProject = ((IAdaptable)
-             * firstSegmentObj).getAdapter(IProject.class); if (theProject ==
-             * null) { MessageDialog.openInformation(window.getShell(),
-             * "Navigator Popup", getClassHierarchyAsMsg(
-             * "Expected the first segment to be IAdapatable to an IProject.\nBut got the following class hierarchy instead."
-             * , "Make sure to directly select a file.", firstSegmentObj));
-             * return false; }
-             *
-             * // The last segment should be an IResource Object lastSegmentObj
-             * = treePath.getLastSegment(); IResource theResource =
-             * ((IAdaptable) lastSegmentObj).getAdapter(IResource.class); if
-             * (theResource == null) {
-             * MessageDialog.openInformation(window.getShell(),
-             * "Navigator Popup", getClassHierarchyAsMsg(
-             * "Expected the last segment to be IAdapatable to an IResource.\nBut got the following class hierarchy instead."
-             * , "Make sure to directly select a file.", firstSegmentObj));
-             * return false; }
-             *
-             * // As the last segment is an IResource we should be able to get
-             * an // IFile reference from it IFile theFile = ((IAdaptable)
-             * lastSegmentObj).getAdapter(IFile.class);
-             *
-             * // Extract additional information from the IResource and IProject
-             * String workspaceName =
-             * theResource.getWorkspace().getRoot().getLocation().toOSString();
-             * String projectName = theProject.getName(); String fileName =
-             * theResource.getName();
-             *
-             * return true; } else { String selectionClass =
-             * selection.getClass().getSimpleName();
-             * MessageDialog.openError(window.getShell(),
-             * "Unexpected Selection Class", String.
-             * format("Expected a TreeSelection but got a %s instead.\nProcessing Terminated."
-             * , selectionClass)); }
-             *
-             * return false;
-             */
         }
         return null;
     }
 
-    @SuppressWarnings("rawtypes")
-    private static String getClassHierarchyAsMsg(String msgHeader, String msgTrailer, Object theObj) {
-        String msg = msgHeader + "\n\n";
-
-        Class theClass = theObj.getClass();
-        while (theClass != null) {
-            msg = msg + String.format("Class=%s\n", theClass.getName());
-            Class[] interfaces = theClass.getInterfaces();
-            for (Class theInterface : interfaces) {
-                msg = msg + String.format("    Interface=%s\n", theInterface.getName());
-            }
-            theClass = theClass.getSuperclass();
-        }
-
-        msg = msg + "\n" + msgTrailer;
-
-        return msg;
-    }
 }

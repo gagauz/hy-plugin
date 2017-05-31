@@ -87,6 +87,7 @@ public class ExtensionFixer {
                     }
                 }
             });
+            projectXml.saveDocument();
 
             monitor.worked(1);
 
@@ -112,7 +113,7 @@ public class ExtensionFixer {
                 monitor.setTaskName("Fix classpath for " + extension.getName());
                 new CustomClasspathFixer(extension).fixClasspath();
             }
-            projectXml.saveDocument();
+
             monitor.worked(1);
 
         } catch (Exception e) {

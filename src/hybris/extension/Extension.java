@@ -2,17 +2,23 @@ package hybris.extension;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.eclipse.core.runtime.IPath;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import hybris.Constants;
+import hybris.ant.DirVisitor;
+import hybristools.utils.XmlManipulator;
 import hybristools.utils.XmlUtils;
 
 public class Extension {
@@ -44,6 +50,7 @@ public class Extension {
     private File settings;
     private File extensioninfo;
     private Set<Extension> requiredExtensions;
+    private String packageroot;
     private boolean localExtension;
     private String name;
 
@@ -162,27 +169,30 @@ public class Extension {
             File infoFile = getFileInFolder(Constants.EXTENSIONINFO_FILE_NAME);
             if (infoFile.isFile()) {
                 try {
-                    XmlUtils.parseDocument(infoFile, "requires-extension", new Predicate<Node>() {
-                        @Override
-                        public boolean test(Node nNode) {
-                            Element eElement = (Element) nNode;
-                            String extName = eElement.getAttribute("name");
-                            System.out.println("Found required extension <requires-extension name=\"" + extName + "\"/>");
-                            Extension ext0 = ExtensionResolver.findExtension(getPlatformHome(), extName);
-                            if (null != ext0) {
-                                // if (!ext0.isPlatformExt()) {
-                                requiredExtensions.add(ext0);
-                                // }
-                            } else {
-                                // throw new IllegalStateException("Extension "
-                                // +
-                                // extName + " was not found");
-                                System.err.println("Extension folder " + extName + " was not fond for " + getName());
-                            }
-                            return false;
+                    XmlManipulator xml = new XmlManipulator(infoFile);
+                    xml.walkNodes("extensioninfo/extension/requires-extension", nNode -> {
+                        Element eElement = (Element) nNode;
+                        String extName = eElement.getAttribute("name");
+                        System.out.println("Found required extension <requires-extension name=\"" + extName + "\"/>");
+                        Extension ext0 = ExtensionResolver.findExtension(getPlatformHome(), extName);
+                        if (null != ext0) {
+                            // if (!ext0.isPlatformExt()) {
+                            requiredExtensions.add(ext0);
+                            // }
+                        } else {
+                            // throw new IllegalStateException("Extension "
+                            // +
+                            // extName + " was not found");
+                            System.err.println("Extension folder " + extName + " was not fond for " + getName());
                         }
-
                     });
+
+                    xml.walkNodes("extensioninfo/extension/coremodule", nNode -> {
+                        Element eElement = (Element) nNode;
+                        packageroot = eElement.getAttribute("packageroot");
+                        System.out.println("Found coremodule <coremodule packageroot=" + packageroot + "/>");
+                    });
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new RuntimeException(e);
@@ -219,6 +229,10 @@ public class Extension {
         return new File(folder, name);
     }
 
+    public File getFileInRamFolder(String name) {
+        return new File("R:\\", getName() + "/" + name);
+    }
+
     public Collection<File> getFilesInFolder(String name, FilenameFilter filter) {
         File file = getFileInFolder(name);
         if (file.isDirectory()) {
@@ -252,4 +266,24 @@ public class Extension {
         return platformHome;
     }
 
+    public String getPackageroot() {
+        return packageroot;
+    }
+
+    public Iterable<Path> matchFolders(String src) {
+        IPath p0 = new org.eclipse.core.runtime.Path(src);
+        p0 = p0.removeLastSegments(1);
+        File dir = new File(getFolder(), p0.toOSString());
+
+        if (dir.isDirectory()) {
+            List<Path> list = new ArrayList<>();
+            new DirVisitor(dir, 0).visit(f -> {
+                if (f.isDirectory()) {
+                    list.add(f.toPath());
+                }
+            });
+            return list;
+        }
+        return Collections.emptyList();
+    }
 }

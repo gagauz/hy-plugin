@@ -17,7 +17,7 @@ public class JarFetcher {
     public void fetch(Consumer<File> consumer) {
         if (folder.length > 0) {
             for (String inFolder : folder) {
-                new DirVisitor(new File(extension, inFolder), 0).visit(jar -> {
+                new DirVisitor(new File(extension, inFolder), 2).visit(jar -> {
                     if (jar.getName().endsWith(".jar")) {
                         consumer.accept(jar);
                     }
