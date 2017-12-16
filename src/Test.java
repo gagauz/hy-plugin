@@ -1,6 +1,6 @@
 import java.io.File;
 
-import hybristools.utils.XmlManipulator;
+import com.xl0e.hybris.utils.XmlManipulator;
 
 public class Test {
     public static void main(String[] args) {
